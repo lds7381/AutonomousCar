@@ -42,14 +42,17 @@ int main(void) {
     // Init OLED
     OLED_Init();
     // **************************************
+		
+		uart0_put("Deeba is going!");
 
     // Main Loop to run the car
     while(1){
-        uart0_put("Deeba is going!");
 
         if(speedChange){
             dcDutyCycle = 0.2;
             DCMotor_Modify(dcDutyCycle);  // Run the car forward at a 20% duty Cycle
+					  Servo_Modify(sDutyCycleCCW); 
+						speedChange = FALSE;
         }
     }
 }
