@@ -45,7 +45,7 @@ int main(void) {
     while(1){
         if(speedChange){
             dcDutyCycle = 0.2;
+            DCMotor_Modify(dcDutyCycle);  // Run the car forward at a 20% duty Cycle
         }
-
     }
 }
