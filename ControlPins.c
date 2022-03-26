@@ -32,7 +32,7 @@ unsigned long tempCounter = 0;
 static long pixelCounter = 0;
 
 extern uint16_t line[128];
-extern BOOLEAN g_sendData;
+extern BOOLEAN dataAvaliable;
 
 
 ////////////////////////////////////////////
@@ -129,8 +129,7 @@ void CLK_Handler(void)
 		//are we done??
 		if (pixelCounter == 128)
 		{
-			// set the flag to indicate its OK to send data out uart
-			g_sendData = TRUE;
+			dataAvaliable = TRUE;
 			// stop the clock until the next SI pulse
 			DisableSysTickTimer(); 	// stop the clock       
 			pixelCounter = 0; 			// reset the counter

@@ -6,6 +6,9 @@
                  Will Init and Run DCMotors.
 */
 
+#include <stdio.h>
+#include <stdlib.h>
+
 // Initalization Function with paramters (will start the motor at required cycle)
 // Initalizes TimerA0
 void DCMotor_Init(uint16_t period, double dutyCycle, uint16_t pin){

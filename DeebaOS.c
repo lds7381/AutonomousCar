@@ -5,22 +5,18 @@
     Description: Main file for Operating system for Deeba OS.
                  Runs the entire autnomous car.
 */
-
+#include <stdio.h>
+#include <stdlib.h>
 #include "msp.h"
 #include "uart.h"
-#include "TimerA.h"
-#include "Timer32.h"
-#include "ControlPins.h"
-#include "CortexM.h"
-#include "i2c.h"
 #include "oled.h"
-#include "Switches.h"
-#include "SysTickTimer.h"
 #include "ADC14.h"
-#include "DCMotor.h"
+#include "MotorControl.h"
+#include "Camera.h"
 
 int main(void) {
     // Main Variables
+    BOOLEAN fastMode = TRUE;
     
     // Motor Control Variables
     double dcDutyCycle = 0;       // Duty Cycle (0 so motors do not move, needed for both motors, will run at same duty cycle always)
@@ -30,7 +26,6 @@ int main(void) {
     double sDutyCycle = 0;
     uint16_t sPeriod = 5000;
     uint16_t servoPin = 1;
-
 
     // **** Initalization of Peripherals ****
     // Init Uart0
@@ -43,9 +38,10 @@ int main(void) {
     // Init Servo Motor
     Servo_Init(sPeriod, sDutyCycle, servoPin);  // Servo One (only one)
     // Init Camera
-    
+    LineScanCamera_Init();
     // Init OLED
     OLED_Init();
+    // **************************************
 
     // Main Loop to run the car
     while(1){
