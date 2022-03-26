@@ -1,3 +1,5 @@
+#pragma once
+
 /*  Authors:    Liam Sullivan
                 Andre DaCosta
     Project:    IDE Autonomous Car

@@ -11,10 +11,11 @@
 #include <stdlib.h>
 #include "ControlPins.h"
 #include "CortexM.h"
+#include "msp432p4011.h"
 
 // Camera varaibles (externed in Control Pins, will be modified there)
 uint16_t line[128];
-BOOLEAN dataAvaliable;
+BOOLEAN dataAvaliable = FALSE;
 
 void LineScanCamera_Init(){
     DisableInterrupts();    // Stop Interrupts

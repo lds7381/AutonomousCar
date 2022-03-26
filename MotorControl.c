@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "TimerA.h"
 
 // Initalization Function with paramters (will start the motor at required cycle)
 // Initalizes TimerA0
@@ -23,7 +24,7 @@ void DCMotor_Init(uint16_t period, double dutyCycle){
 }
 
 // Initalization Function with paramters (will start the motor at required cycle)
-// Initalizes TimerA2
+// Initalizes TimerA2 (P5.6)
 void Servo_Init(uint16_t period, double dutyCycle){
     int ret = TIMER_A2_PWM_Init(period, dutyCycle, 1);
         if (ret != 0){

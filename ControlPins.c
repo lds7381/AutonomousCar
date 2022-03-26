@@ -1,15 +1,13 @@
-#include "msp.h"
 #include "Timer32.h"
 #include "Common.h"
 #include "CortexM.h"
 #include "SysTickTimer.h"
 #include "ControlPins.h"
 #include "ADC14.h"
+#include "Camera.h"
 
 
-#include "Leds.h"
 extern uint32_t SystemCoreClock;
-
 // default SI integration time is 7.5ms = 133Hz
 //
 #define INTEGRATION_TIME .075f
@@ -27,8 +25,6 @@ extern uint32_t SystemCoreClock;
 // SI Pin will be P5.5 A0
 // CLK Pin will be P5.4 A1
 
-
-unsigned long tempCounter = 0;
 static long pixelCounter = 0;
 
 extern uint16_t line[128];

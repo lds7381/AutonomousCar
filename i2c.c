@@ -78,16 +78,18 @@ void i2c0_Init(int listenerAddress)
 
 void i2c0_put(BYTE *data, unsigned int len)
 {
+	int i;
+
 		// enable i2c module, (remove from RESET)
     EUSCI_B0->CTLW0 &= ~BIT0;
 
     // generate start condition and wait for the bus 
     EUSCI_B0->CTLW0 |= BIT1;  
 
-		// write data byte by byte to i2c, use putchar
-		for (int i=0; i<len; i++){	
-			i2c0_putchar(data[i]);
-		}
+	// write data byte by byte to i2c, use putchar
+	for (i=0; i<len; i++){	
+		i2c0_putchar(data[i]);
+	}
 
     // force stop
     EUSCI_B0->CTLW0 |= BIT2; 
@@ -100,7 +102,7 @@ void i2c0_put(BYTE *data, unsigned int len)
 }
 
 /* write data on i2c bus */
-static void i2c0_putchar(BYTE data)
+void i2c0_putchar(BYTE data)
 {
     // write data to TXBUF
     EUSCI_B0->TXBUF = data;
