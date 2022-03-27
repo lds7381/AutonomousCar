@@ -5,6 +5,8 @@
     Description: Header file for Camera helper class.
 */
 
-#include "ControlPins.h"
+#include <stdio.h>
+#include <stdint.h>
 
 void LineScanCamera_Init(void);
+uint16_t* getCameraData();

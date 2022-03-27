@@ -9,6 +9,7 @@
 #include "Common.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include "ControlPins.h"
 #include "CortexM.h"
 #include "msp432p4011.h"
@@ -30,4 +31,5 @@ uint16_t * getCameraData(){
         dataAvaliable = FALSE;      // Set data Avaiable to false
         return line;                // Send the data out
     }
+		return 0;
 }

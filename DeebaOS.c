@@ -27,6 +27,11 @@ int main(void) {
     double sDutyCycleMid = .6025;
     double sDutyCycleCW  = .205;
     double sDutyCycleCCW = .99;
+		int i;
+		uint16_t *lineData;
+	  int avgLineData = 0;
+	  char str[10];
+		char oled[6] = "Deeba";
 
     // **** Initalization of Peripherals ****
     // Init Uart0
@@ -43,16 +48,30 @@ int main(void) {
     OLED_Init();
     // **************************************
 		
-		uart0_put("Deeba is going!");
-
+		uart0_put("Deeba is going!\n\r");
+		dcDutyCycle = 0.2;
+		OLED_display_on();
+		OLED_PrintLine(oled);
+		
     // Main Loop to run the car
     while(1){
-
-        if(speedChange){
-            dcDutyCycle = 0.2;
-            DCMotor_Modify(dcDutyCycle);  // Run the car forward at a 20% duty Cycle
-					  Servo_Modify(sDutyCycleCCW); 
-						speedChange = FALSE;
-        }
-    }
+			DCMotor_Modify(dcDutyCycle);  // Run the car forward at a 20% duty Cycle
+			Servo_Modify(sDutyCycleMid); 
+			for(i=0; i<10000000; i++);
+			dcDutyCycle = 0.5;
+			DCMotor_Modify(dcDutyCycle);  // Run the car forward at a 50% duty Cycle
+			Servo_Modify(sDutyCycleCCW); 
+      for(i=0; i<10000000; i++);
+			dcDutyCycle = 0.9;
+			DCMotor_Modify(dcDutyCycle);  // Run the car forward at a 50% duty Cycle
+			Servo_Modify(sDutyCycleCW); 
+			for(i=0; i<10000000; i++);
+		  lineData = getCameraData();
+			for (i=0; i<128; i++){
+					avgLineData += lineData[i];
+			}
+			avgLineData /= 128;
+			sprintf(str, "Avg: %d\n\r", avgLineData);
+			uart0_put(str);
+		}
 }
