@@ -13,6 +13,7 @@
 // Initalization Function with paramters (will start the motor at required cycle)
 // Initalizes TimerA0
 void DCMotor_Init(uint16_t period, double dutyCycle){
+		// Initalize Motors
     int ret = TIMER_A0_PWM_Init(period, dutyCycle, 1);
         if (ret != 0){
             uart0_put("Warning: DC Motor 1 Failed to Initialize!");
@@ -21,11 +22,18 @@ void DCMotor_Init(uint16_t period, double dutyCycle){
         if (ret != 0){
             uart0_put("Warning: DC Motor 2 Failed to Initialize!");
 		}
+		// Enable PWM on Motor Controller
+		P3->SEL0 &= ~BIT6;
+		P3->SEL0 &= ~BIT6;
+		P3->DIR  |= BIT6;
+		P3->SEL0 &= ~BIT7;
+		P3->SEL0 &= ~BIT7;
+		P3->DIR  |= BIT7;
 }
 
 // Initalization Function with paramters (will start the motor at required cycle)
 // Initalizes TimerA2 (P5.6)
-void Servo_Init(uint16_t period, double dutyCycle){
+void Servo_Init(uint32_t period, double dutyCycle){
     int ret = TIMER_A2_PWM_Init(period, dutyCycle, 1);
         if (ret != 0){
             uart0_put("Warning: TIMERA2 Failed to Initialize!");
@@ -41,4 +49,14 @@ void DCMotor_Modify(double dutyCycle){
 // Changes the Active Duty Cycle of the PWM for the DC Motor on TimerA2
 void Servo_Modify(double dutyCycle){
     TIMER_A2_PWM_DutyCycle(dutyCycle, 1);
+}
+
+void DCMotor_On(){
+		P3->OUT |= BIT6;
+		P3->OUT |= BIT7;
+}
+
+void DCMotor_Off(){
+		P3->OUT &= ~BIT6;
+		P3->OUT &= ~BIT7;
 }

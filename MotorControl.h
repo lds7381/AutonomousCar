@@ -12,6 +12,8 @@
 #include "TimerA.h"
 
 void DCMotor_Init(uint16_t period, double dutyCycle);
-void Servo_Init(uint16_t period, double dutyCycle);
+void Servo_Init(uint32_t period, double dutyCycle);
 void DCMotor_Modify(double dutyCycle);
 void Servo_Modify(double dutyCycle);
+void DCMotor_On(void);
+void DCMotor_Off(void);

@@ -108,7 +108,7 @@ void TIMER_A0_PWM_DutyCycle(double percentDutyCycle, uint16_t pin)
 //          percentDutyCycle (0 -> 1.0)//          duty cycle
 //          pin number (1,2,3,4), but always 1
 // Outputs: none
-int TIMER_A2_PWM_Init(uint16_t period, double percentDutyCycle, uint16_t pin)
+int TIMER_A2_PWM_Init(uint32_t period, double percentDutyCycle, uint16_t pin)
 {
 
 	// NOTE: Timer A2 only exposes 1 PWM pin
@@ -143,7 +143,9 @@ int TIMER_A2_PWM_Init(uint16_t period, double percentDutyCycle, uint16_t pin)
 	
 	// Timer CONTROL register
 	// TIMER_A0->CTL
-	TIMER_A2->CTL |= 0x211; 
+	TIMER_A2->CTL |= 0x261; 
+	
+	TIMER_A2->EX0 |= 0x6;
 
 	// Start the timer by inputting the counter value
 	if (pin == 1)
