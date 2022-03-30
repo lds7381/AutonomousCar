@@ -29,6 +29,9 @@ void DCMotor_Init(uint16_t period, double dutyCycle){
 		P3->SEL0 &= ~BIT7;
 		P3->SEL0 &= ~BIT7;
 		P3->DIR  |= BIT7;
+		// Keep the Motors off
+		P3->OUT  &= ~BIT6;
+		P3->OUT	 &= ~BIT7;
 }
 
 // Initalization Function with paramters (will start the motor at required cycle)

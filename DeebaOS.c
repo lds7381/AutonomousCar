@@ -25,19 +25,29 @@ int main(void) {
     
     // Motor Control Variables
     double dcDutyCycle = 0;       // Duty Cycle (0 so motors do not move, needed for both motors, will run at same duty cycle always)
+		double dcDutyCycleTurn = 0.15;
     uint16_t dcPeriod = 10000;    // Run at 10kHz Period
     uint32_t sPeriod = CalcPeriodFromFrequency(50);
 		char str[32];
-    double sDutyCycleMid = .6;
-    double sDutyCycleCW  = .205;
-    double sDutyCycleCCW = .99;
-		double turnIncrement = 0.0471;
+    double sDutyCycleMid = 0.0497;
+    double sDutyCycleR  = 0.0471;
+    double sDutyCycleL = 0.0521;
+		double slightLeft = 0.0515;
+		double slightRight = 0.0477;
+		double currentTurn;
+		int carpetCount = 0;
 		int i;
 		uint16_t *lineData;
 	  int avgLineData = 0;
+		int compare;
 	  char turnstr[10];
 		char oled[6] = "Deeba";
-
+		uint16_t leftAvg;
+		uint16_t rightAvg;
+		uint16_t midAvg;
+		uint16_t totAvg;
+		int sum = 0;
+		
     // **** Initalization of Peripherals ****
     // Init Uart0
     uart0_init();
@@ -54,49 +64,64 @@ int main(void) {
     // **************************************
 		
 		uart0_put("Deeba is going!\n\r");
-		dcDutyCycle = 0.3;
-		//OLED_display_on();
-		//OLED_PrintLine(oled);
+		dcDutyCycle = 0.12;
 		
-		//DCMotor_Modify(dcDutyCycle);  // Run the car forward at a 20% duty Cycle
-		//Servo_Modify(turnIncrement);
-		//for(i=0; i<1000000; i++);
-		//Servo_Modify(sDutyCycleCCW); 
-		//for(i=0; i<1000000; i++);
-		//Servo_Modify(sDutyCycleMid);
-		//for(i=0; i<1000000; i++);
-		//Servo_Modify(sDutyCycleCW);
+		// Set servo striaght
+		Servo_Modify(sDutyCycleMid);
 		
-		//DCMotor_On();
-		//uart0_put("****DCMotor**** ON\n\r");
+		// Start Motor
+		DCMotor_Modify(dcDutyCycle);
+		DCMotor_On();
 		
-    // Main Loop to run the car
-    while(1){
-			while (turnIncrement <= .0522){
-					Servo_Modify(turnIncrement);
-					sprintf(turnstr, "Duty Cycle=%f\n\r", turnIncrement);
-					uart0_put(turnstr);
-					for(i=0;i<1000000;i++);
-					turnIncrement += .0001;
+		while(1){
+			lineData = getCameraData();
+			compare = compareLeftRight(lineData);
+			if(compare == -1){
+					DCMotor_Modify(dcDutyCycleTurn);
+					Servo_Modify(slightRight);
 			}
-			Servo_Modify(.0496);
-				//			for(i=0; i<10000000; i++){
-//				if (i % 100000 == 0){
-//					 uart0_put("waiting on\n\r");
-//				}
-//				if (i == 10000000-1){
-//						uart0_put("waiting over\n\r");
-//				}
+			else if (compare == 1) {
+					DCMotor_Modify(dcDutyCycleTurn);
+					Servo_Modify(slightLeft);
+			}
+			else {
+					DCMotor_Modify(dcDutyCycle);
+					Servo_Modify(sDutyCycleMid);
+			}
+		}
+		
+		
+//			midAvg = getMidAverage(lineData);
+//			if(midAvg <= 1000){
+//						DCMotor_Off();
+//			} 
+//************************			
+//			totAvg = getTotalAverage(lineData);
+//			if ( totAvg < 450){
+//					carpetCount++;
+//					if (carpetCount >= 5){
+//						DCMotor_Off();
+//					}
 //			}
-//			DCMotor_Off();
-//			uart0_put("****Motor off****\n\r");
-			for(i=0; i<10000000; i++);
-//		  lineData = getCameraData();
+			
 //			for (i=0; i<128; i++){
 //					avgLineData += lineData[i];
 //			}
 //			avgLineData /= 128;
 //			sprintf(str, "Avg: %d\n\r", avgLineData);
 //			uart0_put(str);
+//			
+//			if (avgLineData >= 16000){
+//				Servo_Modify(sDutyCycleMid);
+//			}
+//			else if(avgLineData < 16000 && avgLineData > 15500){
+////				if(currentTurn + 0.004 >= sDutyCycleL){	
+////					currentTurn += 0.001;	
+////					Servo_Modify(currentTurn);
+////				}
+//				Servo_Modify(.0516);
+//			}
+//			else if (avgLineData < 15000){
+//					DCMotor_Off();
+//			}
 		}
-}

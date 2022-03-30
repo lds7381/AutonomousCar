@@ -10,3 +10,8 @@
 
 void LineScanCamera_Init(void);
 uint16_t* getCameraData();
+uint16_t getLeftAverage(uint16_t* line);
+uint16_t getRightAverage(uint16_t* line);
+int compareLeftRight(uint16_t* line);
+uint16_t getMidAverage(uint16_t* line);
+uint16_t getTotalAverage(uint16_t* line);
