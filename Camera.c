@@ -57,7 +57,7 @@ uint16_t getRightAverage(uint16_t* line){
 uint16_t getMidAverage(uint16_t* line){
 		uint16_t averageMid=0;
 		int i;
-		for(i=33; i<= 95; i++){
+		for(i=39; i<= 89; i++){
 			averageMid += line[i];
 		}
 		return averageMid/32;
@@ -90,6 +90,19 @@ int compareLeftRight(uint16_t* line){
 		}
 		else {
 			return 0;
+		}
+		return 0;
+}
+
+int checkOnCarpet(uint16_t* line){
+		int i;
+		int carpetCount = 0;
+		uint16_t mid;
+		mid = getMidAverage(line);
+		//sprintf(str, "Mid Avg: %d\t", mid);
+		//uart0_put(str);
+		if (mid<750){
+				return 1;
 		}
 		return 0;
 }

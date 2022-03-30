@@ -47,6 +47,7 @@ int main(void) {
 		uint16_t midAvg;
 		uint16_t totAvg;
 		int sum = 0;
+		int onCarpet = 0;
 		
     // **** Initalization of Peripherals ****
     // Init Uart0
@@ -88,6 +89,16 @@ int main(void) {
 					DCMotor_Modify(dcDutyCycle);
 					Servo_Modify(sDutyCycleMid);
 			}
+			onCarpet = checkOnCarpet(lineData);
+			if(onCarpet == 1){
+					carpetCount++;
+					if(carpetCount >= 3){
+						DCMotor_Off();
+					}
+			} else {
+					carpetCount = 0;
+			}
+			
 		}
 		
 		
