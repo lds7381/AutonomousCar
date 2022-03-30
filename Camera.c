@@ -85,7 +85,7 @@ int compareLeftRight(uint16_t* line){
 		if(leftAvg != 510 ){ 
 				return -1;
 		}
-		else if(rightAvg > 900 || rightAvg < 300) {   // was != 2047
+		else if(rightAvg > 900 || rightAvg < 600) {   // was != 2047
 				return 1;
 		}
 		else {

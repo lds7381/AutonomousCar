@@ -25,15 +25,15 @@ int main(void) {
     
     // Motor Control Variables
     double dcDutyCycle = 0;       // Duty Cycle (0 so motors do not move, needed for both motors, will run at same duty cycle always)
-		double dcDutyCycleTurn = 0.15;
+		double dcDutyCycleTurn = 0.16;
     uint16_t dcPeriod = 10000;    // Run at 10kHz Period
     uint32_t sPeriod = CalcPeriodFromFrequency(50);
 		char str[32];
     double sDutyCycleMid = 0.0497;
     double sDutyCycleR  = 0.0471;
     double sDutyCycleL = 0.0521;
-		double slightLeft = 0.0515;
-		double slightRight = 0.0477;
+		double slightLeft = 0.0512;
+		double slightRight = 0.0473;
 		double currentTurn;
 		int carpetCount = 0;
 		int i;
@@ -64,7 +64,7 @@ int main(void) {
     // **************************************
 		
 		uart0_put("Deeba is going!\n\r");
-		dcDutyCycle = 0.12;
+		dcDutyCycle = 0.14;
 		
 		// Set servo striaght
 		Servo_Modify(sDutyCycleMid);
