@@ -63,7 +63,27 @@ int main(void) {
     // **************************************
 		
 		uart0_put("Deeba is going!\n\r");
-		dcDutyCycle = 0.14;
+		dcDutyCycle = 0.2;
+		
+		DCMotor_On();
+		LeftMotorForward(dcDutyCycle);
+		for(i=0;i<10000000;i++);
+		RightMotorForward(dcDutyCycle);
+		for(i=0;i<10000000;i++);
+		DCMotor_Modify(dcDutyCycle);
+		for(i=0;i<10000000;i++);
+//		RightMotorBackward(dcDutyCycle);
+//		for(i=0;i<10000000;i++);
+//		LeftMotorForward(dcDutyCycle);
+//		for(i=0;i<1000000;i++);
+//		LeftMotorBackward(dcDutyCycle);
+//		for(i=0;i<1000000;i++);
+		DCMotor_Off();
+		
+		while(1);
+		
+		
+		///**************
 		
 		// Set servo striaght
 		Servo_Modify(sDutyCycleMid);
