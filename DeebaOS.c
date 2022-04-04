@@ -23,30 +23,32 @@ int main(void) {
 		uint16_t dcPeriod = 10000;    // Run at 10kHz Period
     uint32_t sPeriod  = CalcPeriodFromFrequency(50);
 		uint16_t *lineData;
+		uint16_t *smoothLine;
 		int carpetCount 	= 0;
 		int onCarpet 			= 0;
-		int compare;
+		int turnDir;
+		BOOLEAN move = TRUE;
     
     // Motor Control Variables
     double dcDutyCycle     = 0;       		// Duty Cycle (0 so motors do not move, needed for both motors, will run at same duty cycle always)
-		double dcDutyCycleTurn = 0.16;				// Turn speed for DC motors
+		double dcDutyCycleTurn = 0.34;				// Turn speed for DC motors
     double sDutyCycleMid 	 = 0.0497;
-		double slightLeft      = 0.0512;
+		double slightLeft      = 0.0517;
 		double slightRight     = 0.0473; 
 		
 		// Current unused Vars
-//		double sDutyCycleR  = 0.0471;
-//    double sDutyCycleL = 0.0521;
+		double sDutyCycleR  = 0.0471;
+    double sDutyCycleL = 0.0521;
 //		double currentTurn;
 //		int avgLineData = 0;
 //		char turnstr[10];
-//		uint16_t leftAvg;
-//		uint16_t rightAvg;
-//		uint16_t midAvg;
+		double leftAvg;
+		double rightAvg;
+		double midAvg;
 //		uint16_t totAvg;
 //    int sum = 0;
-//    char str[32];				// String used for uart printing
-//		int i;
+    char str[32];				// String used for uart printing
+		int i;
 		
     // **** Initalization of Peripherals ****
     // Init Uart0
@@ -60,41 +62,77 @@ int main(void) {
     // Init Camera
     LineScanCamera_Init();
     // Init OLED
-    OLED_Init();
+    //OLED_Init();
+		//OLED_Print(1, 1, (char *)"Hello World?");
     // **************************************
+		
+//		while(1){
+//			lineData = getCameraData();
+//			smoothLine = smoothData(lineData);
+//			leftAvg = getLeftAverage(smoothLine);
+//			rightAvg = getRightAverage(smoothLine);
+//			midAvg = getMidAverage(smoothLine);
+//			sprintf(str, "Left Avg: %f\t", leftAvg);
+//			uart0_put(str);
+//			sprintf(str, "Mid Avg: %f\t", midAvg);
+//			uart0_put(str);
+//			sprintf(str, "Right Avg: %f\n\r", rightAvg);
+//			uart0_put(str);
+//			for(i=0;i<1000500;i++);
+//		}
 		
 		uart0_put("Deeba is going!\n\r");
 		//Set duty 
-		dcDutyCycle = 0.2;
+		dcDutyCycle = 0.27;
+		
+		// **** Test Area ****
 		// Test Motor Foward Functionality
-		testMotorForward(dcDutyCycle);
-		while(1);		// hold here
+		//testMotorForward(dcDutyCycle);
+//		while(1){		// hold here
+//			lineData = getCameraData();
+//			displayCameraData(lineData);
+//			for(i=0;i<100000;i++);
+//		}
 		
 		///*** MAIN CODE ****
 		
 		// Set servo striaght
 		Servo_Modify(sDutyCycleMid);
+		
 		// Start Motors
-		DCMotor_Modify(dcDutyCycle);
 		DCMotor_On();
+		DCMotor_Modify(dcDutyCycle);
+		
 		
 		// Main Loop
-		while(1){
+		while(move){
 			// Get the Camera Data
 			lineData = getCameraData();
 			// Compare Left and Right Camera data to see if turn needed
-			compare = compareLeftRight(lineData);
+			turnDir = computeTurn(lineData);
 			// Use Compare to decide turn
-			switch (compare){
-				case -1:		// Left Heavy, Turn right
-					DCMotor_Modify(dcDutyCycleTurn);
-					Servo_Modify(slightRight);
+			switch (turnDir){
+				case 0:			// Staight
+					DCMotor_Modify(dcDutyCycle);
+					Servo_Modify(sDutyCycleMid);
 					break;
-				case 1:			// Right Heavy, Turn left
+				case 1:			// Slight Left
 					DCMotor_Modify(dcDutyCycleTurn);
 					Servo_Modify(slightLeft);
 					break;
-				case 0:			// Equal sides, keep straight
+				case 2:			// Slight Right
+					DCMotor_Modify(dcDutyCycleTurn);
+					Servo_Modify(slightRight);
+					break;
+				case 3:			// Hard Left
+					DCMotor_Modify(dcDutyCycleTurn);
+					Servo_Modify(sDutyCycleL);
+					break;
+				case 4:			// Hard Right
+					DCMotor_Modify(dcDutyCycleTurn);
+					Servo_Modify(sDutyCycleR);
+					break;
+				case 5:			// Bad Data
 					DCMotor_Modify(dcDutyCycle);
 					Servo_Modify(sDutyCycleMid);
 					break;
@@ -107,8 +145,8 @@ int main(void) {
 				case 1:
 					carpetCount++;
 					// Check for atleast 3 carpet checks
-					if(carpetCount >= 3){
-						DCMotor_Off();
+					if(carpetCount >= 5){
+						move = FALSE;
 					}
 					break;
 				case 0:
@@ -116,9 +154,10 @@ int main(void) {
 					carpetCount = 0;
 					break;
 			}
-			
+			//for(i=0;i<10000;i++);
 			// Display camera data on OLED
-			displayCameraData(lineData);
+			//displayCameraData(lineData);
 			
 		} /* End Main Loop */
+		DCMotor_Off();
 }

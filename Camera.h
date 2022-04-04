@@ -8,12 +8,14 @@
 #include <stdio.h>
 #include <stdint.h>
 
+
 void LineScanCamera_Init(void);
 uint16_t* getCameraData(void);
-uint16_t getLeftAverage(uint16_t* line);
-uint16_t getRightAverage(uint16_t* line);
-int compareLeftRight(uint16_t* line);
-uint16_t getMidAverage(uint16_t* line);
+uint16_t* smoothData(uint16_t* line);
+double getLeftAverage(uint16_t* line);
+double getRightAverage(uint16_t* line);
+int computeTurn(uint16_t* line);
+double getMidAverage(uint16_t* line);
 uint16_t getTotalAverage(uint16_t* line);
 int checkOnCarpet(uint16_t* line);
 void displayCameraData(uint16_t* line);

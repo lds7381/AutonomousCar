@@ -9,7 +9,7 @@
 #define I2C_H_
 #include "Common.h"
 
-#define BR_RATE 						 (400000)
+#define BR_RATE 						 (40000) //6400000 for 48Mhz maybe 400000
 #define OLED_ADDR            (0x3C)
 
 void i2c0_Init(int listenerAddress);

@@ -30,17 +30,16 @@ extern uint32_t SystemCoreClock;
 
 void i2c0_Init(int listenerAddress)
 {
-	
-		// make sure module is disabled (in reset mode) 
-		//EUSCI_B0->CTLW0 |= BIT0;
-
 		// set appropriate Port.Pins for SDA/SCL
     P1->SEL0 |=  BIT6;		// P1.6 SEL0=1  SDA
 		P1->SEL1 &= ~BIT6;	  // P1.6 SEL1=0  SDA
     P1->SEL0 |=  BIT7;		// P1.7 SEL0=1	SCL
 		P1->SEL1 &= ~BIT7;		// P1.7 SEL1=0  SCL
 	
-	/*
+		// make sure module is disabled (in reset mode) 
+		EUSCI_B0->CTLW0 |= BIT0;
+	
+		/*
 		// 7 bit LISTENER and self, 0
 		EUSCI_B0->CTLW0 &= ~BITE;
 		// single MASTER, 0 
@@ -63,7 +62,6 @@ void i2c0_Init(int listenerAddress)
     EUSCI_B0->CTLW0 &= ~(BIT3 | BIT2 | BIT1);
 		*/
 		// All above makes CTLW0 register = 0x0FD1
-		
 		// Set the register to its initilization Hex Number
 		EUSCI_B0->CTLW0 = 0x0FD1;
 		

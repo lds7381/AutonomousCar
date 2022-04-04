@@ -6,6 +6,7 @@
                  Will Init and Run the Camera, utilizes I2C Protocol.
 */
 
+
 #include "Common.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,8 +19,11 @@
 
 // Camera varaibles (externed in Control Pins, will be modified there)
 uint16_t line[128];
+uint16_t smoothLine[128];
 BOOLEAN dataAvaliable = FALSE;
 char str[10];
+
+
 
 void LineScanCamera_Init(){
     DisableInterrupts();    // Stop Interrupts
@@ -37,31 +41,41 @@ uint16_t * getCameraData(){
 		return 0;
 }
 
-uint16_t getLeftAverage(uint16_t* line){
-		uint16_t averageLeft=0;
+uint16_t * smoothData(uint16_t* line){
 		int i;
-		for(i=0; i<= 32; i++){
+		for (i=2; i<127; i++){
+			smoothLine[i] = line[i-2] + line[i-1] + line[i] + line[i+1] + line[i+2];
+			smoothLine[i] = smoothLine[i]/5;
+		}
+		return smoothLine;
+	
+}
+
+double getLeftAverage(uint16_t* line){
+		double averageLeft=0;
+		int i;
+		for(i=0; i<= 16; i++){
 			averageLeft += line[i];
 		}
-		return averageLeft/32;
+		return averageLeft/17;
 }
 
-uint16_t getRightAverage(uint16_t* line){
-		uint16_t averageRight=0;
+double getRightAverage(uint16_t* line){
+		double averageRight=0;
 		int i;
-		for(i=96; i<= 128; i++){
+		for(i=112; i<= 128; i++){
 			averageRight += line[i];
 		}
-		return averageRight/32;
+		return averageRight/17;
 }
 
-uint16_t getMidAverage(uint16_t* line){
-		uint16_t averageMid=0;
+double getMidAverage(uint16_t* line){
+		double averageMid=0;
 		int i;
-		for(i=39; i<= 89; i++){
+		for(i=50; i<= 78; i++){
 			averageMid += line[i];
 		}
-		return averageMid/32;
+		return averageMid/29;
 }
 
 uint16_t getTotalAverage(uint16_t* line){
@@ -73,33 +87,52 @@ uint16_t getTotalAverage(uint16_t* line){
 		return averageTotal/128;
 }
 
-int compareLeftRight(uint16_t* line){
-//		int i;
-		uint16_t leftAvg = getLeftAverage(line);
-		uint16_t rightAvg = getRightAverage(line);
-//		sprintf(str, "Left Avg: %d\t", leftAvg);
+int computeTurn(uint16_t* line){
+		int i;
+		
+		double leftAvg = getLeftAverage(line);
+		double rightAvg = getRightAverage(line);
+		double midAvg   = getMidAverage(line);
+		int turnDir = 0;
+//		sprintf(str, "Left Avg: %f\t", leftAvg);
 //		uart0_put(str);
-//		sprintf(str, "Right Avg: %d\n\r", rightAvg);
+//		sprintf(str, "Right Avg: %f\n\r", rightAvg);
 //		uart0_put(str);
 //		for(i=0;i<100000;i++);
-//		
-		if(leftAvg != 510 ){ 
-				return -1;
+//
+		// Control Logics
+		if((rightAvg > 4750) && (leftAvg > 4750)){ 
+				turnDir = 0;
+				return turnDir;
 		}
-		else if(rightAvg > 900 || rightAvg < 600) {   // was != 2047
-				return 1;
+		else if(/*(leftAvg > 5000) &&*/ (rightAvg < 2400)) {   // was != 2047
+				turnDir = 1;
+				return turnDir;
+		}
+		else if (/*(rightAvg > 5000) &&*/ (leftAvg < 2400)){
+				turnDir = 2;
+				return turnDir;
+		}
+		else if(/*(leftAvg > 5000) &&*/ (rightAvg < 1600)){
+				turnDir = 3;
+				return turnDir;
+		}
+		else if (/*(rightAvg > 5000) &&*/ (leftAvg < 1800)){
+				turnDir = 4;
+				return turnDir;
 		}
 		else {
-			return 0;
+				turnDir = 5;
+				return turnDir;
 		}
 }
 
 int checkOnCarpet(uint16_t* line){
-		uint16_t mid;
-		mid = getMidAverage(line);
+		uint16_t carpet;
+		carpet = getMidAverage(line);
 		//sprintf(str, "Mid Avg: %d\t", mid);
 		//uart0_put(str);
-		if (mid<750){
+		if (carpet<1400){
 				return 1;
 		}
 		return 0;
