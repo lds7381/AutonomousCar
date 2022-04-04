@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "TimerA.h"
+#include "uart.h"
 
 // Initalization Function with paramters (will start the motor at required cycle)
 // Initalizes TimerA0
@@ -41,6 +42,28 @@ void Servo_Init(uint32_t period, double dutyCycle){
         if (ret != 0){
             uart0_put("Warning: TIMERA2 Failed to Initialize!");
 		}
+}
+
+
+void RightMotorForward(double dutyCycle){
+		TIMER_A0_PWM_DutyCycle(dutyCycle,1);
+		TIMER_A0_PWM_DutyCycle(0,2);
+}
+
+void LeftMotorForward(double dutyCycle){
+		TIMER_A0_PWM_DutyCycle(dutyCycle, 3);
+		TIMER_A0_PWM_DutyCycle(0,4);
+
+}
+
+void RightMotorBackward(double dutyCycle){
+		TIMER_A0_PWM_DutyCycle(dutyCycle,2);
+		TIMER_A0_PWM_DutyCycle(0,1);
+}
+
+void LeftMotorBackward(double dutyCycle){
+		TIMER_A0_PWM_DutyCycle(dutyCycle,4);
+		TIMER_A0_PWM_DutyCycle(0,3);
 }
 
 // Changes the Active Duty Cycle of the PWM for the DC Motor on TimerA0

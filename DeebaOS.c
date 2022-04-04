@@ -20,15 +20,13 @@ extern long CalcPeriodFromFrequency (double Hz);
 
 int main(void) {
     // Main Variables
-    BOOLEAN fastMode = TRUE;
-    BOOLEAN speedChange = TRUE;  // Car will need to Change speed of start (starts stopped)
+		uint16_t dcPeriod = 10000;    // Run at 10kHz Period
+    uint32_t sPeriod = CalcPeriodFromFrequency(50);
+		char str[32];				// String used for uart printing
     
     // Motor Control Variables
-    double dcDutyCycle = 0;       // Duty Cycle (0 so motors do not move, needed for both motors, will run at same duty cycle always)
-		double dcDutyCycleTurn = 0.16;
-    uint16_t dcPeriod = 10000;    // Run at 10kHz Period
-    uint32_t sPeriod = CalcPeriodFromFrequency(50);
-		char str[32];
+    double dcDutyCycle = 0;       		// Duty Cycle (0 so motors do not move, needed for both motors, will run at same duty cycle always)
+		double dcDutyCycleTurn = 0.16;		// Turn speed for DC motors
     double sDutyCycleMid = 0.0497;
     double sDutyCycleR  = 0.0471;
     double sDutyCycleL = 0.0521;
@@ -37,8 +35,8 @@ int main(void) {
 		double currentTurn;
 		int carpetCount = 0;
 		int i;
+		int avgLineData = 0;
 		uint16_t *lineData;
-	  int avgLineData = 0;
 		int compare;
 	  char turnstr[10];
 		char oled[6] = "Deeba";
