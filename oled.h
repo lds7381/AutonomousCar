@@ -7,6 +7,8 @@
  *  03/01/2021
  */
 #include "msp.h"
+#include <stdint.h>\
+
 #ifndef OLED_H_
 #define OLED_H_
 

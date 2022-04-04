@@ -22,30 +22,31 @@ int main(void) {
     // Main Variables
 		uint16_t dcPeriod = 10000;    // Run at 10kHz Period
     uint32_t sPeriod = CalcPeriodFromFrequency(50);
-		char str[32];				// String used for uart printing
     
     // Motor Control Variables
     double dcDutyCycle = 0;       		// Duty Cycle (0 so motors do not move, needed for both motors, will run at same duty cycle always)
 		double dcDutyCycleTurn = 0.16;		// Turn speed for DC motors
     double sDutyCycleMid = 0.0497;
-    double sDutyCycleR  = 0.0471;
-    double sDutyCycleL = 0.0521;
 		double slightLeft = 0.0512;
 		double slightRight = 0.0473;
-		double currentTurn;
 		int carpetCount = 0;
 		int i;
-		int avgLineData = 0;
 		uint16_t *lineData;
 		int compare;
-	  char turnstr[10];
-		char oled[6] = "Deeba";
-		uint16_t leftAvg;
-		uint16_t rightAvg;
-		uint16_t midAvg;
-		uint16_t totAvg;
-		int sum = 0;
 		int onCarpet = 0;
+		
+		// Current unused Vars
+//		double sDutyCycleR  = 0.0471;
+//    double sDutyCycleL = 0.0521;
+//		double currentTurn;
+//		int avgLineData = 0;
+//		char turnstr[10];
+//		uint16_t leftAvg;
+//		uint16_t rightAvg;
+//		uint16_t midAvg;
+//		uint16_t totAvg;
+//    int sum = 0;
+//    char str[32];				// String used for uart printing
 		
     // **** Initalization of Peripherals ****
     // Init Uart0
@@ -59,7 +60,7 @@ int main(void) {
     // Init Camera
     LineScanCamera_Init();
     // Init OLED
-    //OLED_Init();
+    OLED_Init();
     // **************************************
 		
 		uart0_put("Deeba is going!\n\r");
@@ -72,85 +73,56 @@ int main(void) {
 		for(i=0;i<10000000;i++);
 		DCMotor_Modify(dcDutyCycle);
 		for(i=0;i<10000000;i++);
-//		RightMotorBackward(dcDutyCycle);
-//		for(i=0;i<10000000;i++);
-//		LeftMotorForward(dcDutyCycle);
-//		for(i=0;i<1000000;i++);
-//		LeftMotorBackward(dcDutyCycle);
-//		for(i=0;i<1000000;i++);
 		DCMotor_Off();
 		
-		while(1);
+		while(1);		// hold here
 		
 		
-		///**************
+		///*** MAIN CODE ****
 		
 		// Set servo striaght
 		Servo_Modify(sDutyCycleMid);
-		
-		// Start Motor
+		// Start Motors
 		DCMotor_Modify(dcDutyCycle);
 		DCMotor_On();
 		
+		// Main Loop
 		while(1){
+			// Get the Camera Data
 			lineData = getCameraData();
+			// Compare Left and Right Camera data to see if turn needed
 			compare = compareLeftRight(lineData);
-			if(compare == -1){
+			// Use Compare to decide turn
+			switch (compare){
+				case -1:		// Left Heavy, Turn right
 					DCMotor_Modify(dcDutyCycleTurn);
 					Servo_Modify(slightRight);
-			}
-			else if (compare == 1) {
+					break;
+				case 1:			// Right Heavy, Turn left
 					DCMotor_Modify(dcDutyCycleTurn);
 					Servo_Modify(slightLeft);
-			}
-			else {
+					break;
+				case 0:			// Equal sides, keep straight
 					DCMotor_Modify(dcDutyCycle);
 					Servo_Modify(sDutyCycleMid);
+					break;
 			}
+			
+			// Carpet Check
 			onCarpet = checkOnCarpet(lineData);
-			if(onCarpet == 1){
+			// Use carpet check data
+			switch (onCarpet){
+				case 1:
 					carpetCount++;
+					// Check for atleast 3 carpet checks
 					if(carpetCount >= 3){
 						DCMotor_Off();
 					}
-			} else {
+					break;
+				case 0:
+					// Reset carpet count if dont see carpet
 					carpetCount = 0;
+					break;
 			}
-			
-		}
-		
-		
-//			midAvg = getMidAverage(lineData);
-//			if(midAvg <= 1000){
-//						DCMotor_Off();
-//			} 
-//************************			
-//			totAvg = getTotalAverage(lineData);
-//			if ( totAvg < 450){
-//					carpetCount++;
-//					if (carpetCount >= 5){
-//						DCMotor_Off();
-//					}
-//			}
-			
-//			for (i=0; i<128; i++){
-//					avgLineData += lineData[i];
-//			}
-//			avgLineData /= 128;
-//			sprintf(str, "Avg: %d\n\r", avgLineData);
-//			uart0_put(str);
-//			
-//			if (avgLineData >= 16000){
-//				Servo_Modify(sDutyCycleMid);
-//			}
-//			else if(avgLineData < 16000 && avgLineData > 15500){
-////				if(currentTurn + 0.004 >= sDutyCycleL){	
-////					currentTurn += 0.001;	
-////					Servo_Modify(currentTurn);
-////				}
-//				Servo_Modify(.0516);
-//			}
-//			else if (avgLineData < 15000){
-//					DCMotor_Off();
-//			}
-		}
+		} /* End Main Loop */
+}

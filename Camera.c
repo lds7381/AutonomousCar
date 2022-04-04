@@ -14,6 +14,7 @@
 #include "CortexM.h"
 #include "msp432p4011.h"
 #include "uart.h"
+#include "oled.h"
 
 // Camera varaibles (externed in Control Pins, will be modified there)
 uint16_t line[128];
@@ -73,7 +74,7 @@ uint16_t getTotalAverage(uint16_t* line){
 }
 
 int compareLeftRight(uint16_t* line){
-		int i;
+//		int i;
 		uint16_t leftAvg = getLeftAverage(line);
 		uint16_t rightAvg = getRightAverage(line);
 //		sprintf(str, "Left Avg: %d\t", leftAvg);
@@ -91,12 +92,9 @@ int compareLeftRight(uint16_t* line){
 		else {
 			return 0;
 		}
-		return 0;
 }
 
 int checkOnCarpet(uint16_t* line){
-		int i;
-		int carpetCount = 0;
 		uint16_t mid;
 		mid = getMidAverage(line);
 		//sprintf(str, "Mid Avg: %d\t", mid);
@@ -105,4 +103,8 @@ int checkOnCarpet(uint16_t* line){
 				return 1;
 		}
 		return 0;
+}
+
+void displayCameraData(uint16_t* line){
+		OLED_DisplayCameraData(line);
 }
