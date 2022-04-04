@@ -97,3 +97,15 @@ void DCMotor_Off(){
 		P3->OUT &= ~BIT6;
 		P3->OUT &= ~BIT7;
 }
+
+void testMotorForward(double dutyCycle){
+		int i = 0;
+		DCMotor_On();
+		LeftMotorForward(dutyCycle);
+		for(i=0;i<10000000;i++);
+		RightMotorForward(dutyCycle);
+		for(i=0;i<10000000;i++);
+		DCMotor_Modify(dutyCycle);
+		for(i=0;i<10000000;i++);
+		DCMotor_Off();
+}

@@ -16,3 +16,4 @@ int compareLeftRight(uint16_t* line);
 uint16_t getMidAverage(uint16_t* line);
 uint16_t getTotalAverage(uint16_t* line);
 int checkOnCarpet(uint16_t* line);
+void displayCameraData(uint16_t* line);

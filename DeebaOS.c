@@ -21,19 +21,18 @@ extern long CalcPeriodFromFrequency (double Hz);
 int main(void) {
     // Main Variables
 		uint16_t dcPeriod = 10000;    // Run at 10kHz Period
-    uint32_t sPeriod = CalcPeriodFromFrequency(50);
+    uint32_t sPeriod  = CalcPeriodFromFrequency(50);
+		uint16_t *lineData;
+		int carpetCount 	= 0;
+		int onCarpet 			= 0;
+		int compare;
     
     // Motor Control Variables
-    double dcDutyCycle = 0;       		// Duty Cycle (0 so motors do not move, needed for both motors, will run at same duty cycle always)
-		double dcDutyCycleTurn = 0.16;		// Turn speed for DC motors
-    double sDutyCycleMid = 0.0497;
-		double slightLeft = 0.0512;
-		double slightRight = 0.0473;
-		int carpetCount = 0;
-		int i;
-		uint16_t *lineData;
-		int compare;
-		int onCarpet = 0;
+    double dcDutyCycle     = 0;       		// Duty Cycle (0 so motors do not move, needed for both motors, will run at same duty cycle always)
+		double dcDutyCycleTurn = 0.16;				// Turn speed for DC motors
+    double sDutyCycleMid 	 = 0.0497;
+		double slightLeft      = 0.0512;
+		double slightRight     = 0.0473; 
 		
 		// Current unused Vars
 //		double sDutyCycleR  = 0.0471;
@@ -47,6 +46,7 @@ int main(void) {
 //		uint16_t totAvg;
 //    int sum = 0;
 //    char str[32];				// String used for uart printing
+//		int i;
 		
     // **** Initalization of Peripherals ****
     // Init Uart0
@@ -64,19 +64,11 @@ int main(void) {
     // **************************************
 		
 		uart0_put("Deeba is going!\n\r");
+		//Set duty 
 		dcDutyCycle = 0.2;
-		
-		DCMotor_On();
-		LeftMotorForward(dcDutyCycle);
-		for(i=0;i<10000000;i++);
-		RightMotorForward(dcDutyCycle);
-		for(i=0;i<10000000;i++);
-		DCMotor_Modify(dcDutyCycle);
-		for(i=0;i<10000000;i++);
-		DCMotor_Off();
-		
+		// Test Motor Foward Functionality
+		testMotorForward(dcDutyCycle);
 		while(1);		// hold here
-		
 		
 		///*** MAIN CODE ****
 		
@@ -124,5 +116,9 @@ int main(void) {
 					carpetCount = 0;
 					break;
 			}
+			
+			// Display camera data on OLED
+			displayCameraData(lineData);
+			
 		} /* End Main Loop */
 }
