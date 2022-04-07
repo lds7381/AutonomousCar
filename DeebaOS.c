@@ -21,21 +21,22 @@ extern long CalcPeriodFromFrequency (double Hz);
 int main(void) {
     // Main Variables
 		uint16_t dcPeriod 	= CalcPeriodFromFrequency(10000);    // Run at 10kHz Period
-    	uint32_t sPeriod  	= CalcPeriodFromFrequency(50);
+    uint32_t sPeriod  	= CalcPeriodFromFrequency(50);
 		int carpetCount 	= 0;
 		int onCarpet 		= 0;
 		BOOLEAN move 		= TRUE;
-		uint16_t lineData*;
+		uint16_t* lineData;
 		int i;
     
     // Motor Control Variables
-    	double dcDutyCycle     = 0;       		// Duty Cycle (0 so motors do not move, needed for both motors, will run at same duty cycle always)
+    double dcDutyCycle     = 0;       		// Duty Cycle (0 so motors do not move, needed for both motors, will run at same duty cycle always)
 		double dcWantedDuty    = 0.23;
 		int wantedServoPos     = 64;			// Desired Servo Position (64 is straight)
 		double sDutyCycle;
+		double sDutyCycleMid   = 0.0497;
 		int servoPos;
-		pid_t  pid_controlDC;		// Pid Control Variables for DC Motors
-		pid_t  pid_controlServo;	// Pid Control Variables for Servo
+		pid_t*  pid_controlDC;		// Pid Control Variables for DC Motors
+		pid_t*  pid_controlServo;	// Pid Control Variables for Servo
 			
 		// Current unused Vars
 //		double currentTurn;
@@ -45,7 +46,6 @@ int main(void) {
 //    	int sum = 0;
 //		uint16_t smoothLine*;
 //		double dcDutyCycleTurn = 0.34;			// Turn speed for DC motors
-//   	double sDutyCycleMid   = 0.0497;
 //		double slightLeft      = 0.0517;
 //		double slightRight     = 0.0473; 
 //		double sDutyCycleR  = 0.0471;
@@ -63,7 +63,7 @@ int main(void) {
     ADC0_InitSWTriggerCh6();
     // Init DC Motors
     DCMotor_Init(dcPeriod, 0);  
-	for(i=0;i<100000;i++);		// Give a delay for PWM to be set up
+		for(i=0;i<100000;i++);		// Give a delay for PWM to be set up
     // Init Servo Motor
     Servo_Init(sPeriod, 0);  // Servo One (only one)
     // Init Camera

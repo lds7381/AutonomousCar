@@ -10,18 +10,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include "Camera.h"
 #include "ControlPins.h"
 #include "CortexM.h"
 #include "msp432p4011.h"
 #include "uart.h"
 #include "oled.h"
-
-// Struct to hold line data edges from camera (-1 means no edge)
-typedef struct{
-	int midPos;
-	int rightPos;
-	int leftPos;
-} edges_t;
 
 // Camera varaibles (externed in Control Pins, will be modified there)
 uint16_t line[128];
