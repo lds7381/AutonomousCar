@@ -20,32 +20,20 @@ extern long CalcPeriodFromFrequency (double Hz);
 
 int main(void) {
     // Main Variables
-		uint16_t dcPeriod 	= 10000;    // Run at 10kHz Period
+		uint16_t dcPeriod 	= CalcPeriodFromFrequency(10000);    // Run at 10kHz Period
     	uint32_t sPeriod  	= CalcPeriodFromFrequency(50);
-		uint16_t *lineData;
-		uint16_t *smoothLine;
 		int carpetCount 	= 0;
 		int onCarpet 		= 0;
-		int turnDir;
 		BOOLEAN move 		= TRUE;
+		uint16_t lineData*;
 		int i;
-		char str[32];				// String used for uart printing
     
     // Motor Control Variables
     	double dcDutyCycle     = 0;       		// Duty Cycle (0 so motors do not move, needed for both motors, will run at same duty cycle always)
 		double dcWantedDuty    = 0.23;
-		double dcDutyCycleTurn = 0.34;			// Turn speed for DC motors
-   		double sDutyCycleMid   = 0.0497;
-		double slightLeft      = 0.0517;
-		double slightRight     = 0.0473; 
-		double sDutyCycleR  = 0.0471;
-    	double sDutyCycleL = 0.0521;
+		int wantedServoPos     = 64;			// Desired Servo Position (64 is straight)
 		double sDutyCycle;
-		double leftAvg;
-		double rightAvg;
-		double midAvg;
 		int servoPos;
-		int wantedServoPos  = 64;	// Desired Servo Position (64 is straight)
 		pid_t  pid_controlDC;		// Pid Control Variables for DC Motors
 		pid_t  pid_controlServo;	// Pid Control Variables for Servo
 			
@@ -55,6 +43,17 @@ int main(void) {
 //		char turnstr[10];
 //		uint16_t totAvg;
 //    	int sum = 0;
+//		uint16_t smoothLine*;
+//		double dcDutyCycleTurn = 0.34;			// Turn speed for DC motors
+//   	double sDutyCycleMid   = 0.0497;
+//		double slightLeft      = 0.0517;
+//		double slightRight     = 0.0473; 
+//		double sDutyCycleR  = 0.0471;
+//   	double sDutyCycleL = 0.0521;	
+//		double leftAvg;
+//		double rightAvg;
+//		double midAvg;
+//		char str[32];				// String used for uart printing
     	
 		
     // **** Initalization of Peripherals ****
@@ -115,11 +114,9 @@ int main(void) {
 				if(carpetCount >= 5){
 					move = FALSE;
 				}
-				break;
 			case 0:
 				// Reset carpet count if dont see carpet
 				carpetCount = 0;
-				break;
 		}
 		// Small Delay
 		for(i=0;i<10000;i++);
