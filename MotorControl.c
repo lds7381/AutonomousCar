@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "TimerA.h"
+#include "uart.h"
 
 // Initalization Function with paramters (will start the motor at required cycle)
 // Initalizes TimerA0
@@ -29,6 +30,8 @@ void DCMotor_Init(uint16_t period, double dutyCycle){
 		P3->SEL0 &= ~BIT7;
 		P3->SEL0 &= ~BIT7;
 		P3->DIR  |= BIT7;
+//		P3->DS   |= BIT6;
+//		P3->DS   |= BIT7;
 		// Keep the Motors off
 		P3->OUT  &= ~BIT6;
 		P3->OUT	 &= ~BIT7;
@@ -43,10 +46,41 @@ void Servo_Init(uint32_t period, double dutyCycle){
 		}
 }
 
+
+void RightMotorForward(double dutyCycle){
+		TIMER_A0_PWM_DutyCycle(dutyCycle,4);
+		TIMER_A0_PWM_DutyCycle(0,1);
+		TIMER_A0_PWM_DutyCycle(0,2);
+		TIMER_A0_PWM_DutyCycle(0,3);
+}
+
+void LeftMotorBackward(double dutyCycle){
+		TIMER_A0_PWM_DutyCycle(dutyCycle, 2);
+		TIMER_A0_PWM_DutyCycle(0,1);
+		TIMER_A0_PWM_DutyCycle(0,3);
+		TIMER_A0_PWM_DutyCycle(0,4);
+}
+
+void RightMotorBackward(double dutyCycle){
+		TIMER_A0_PWM_DutyCycle(dutyCycle,3);
+		TIMER_A0_PWM_DutyCycle(0,4);
+		TIMER_A0_PWM_DutyCycle(0,1);
+		TIMER_A0_PWM_DutyCycle(0,2);
+}
+
+void LeftMotorForward(double dutyCycle){
+		TIMER_A0_PWM_DutyCycle(dutyCycle,1);
+		TIMER_A0_PWM_DutyCycle(0,2);
+		TIMER_A0_PWM_DutyCycle(0,3);
+		TIMER_A0_PWM_DutyCycle(0,4);
+}
+
 // Changes the Active Duty Cycle of the PWM for the DC Motor on TimerA0
 void DCMotor_Modify(double dutyCycle){
     TIMER_A0_PWM_DutyCycle(dutyCycle, 1);
+		TIMER_A0_PWM_DutyCycle(0,2);
     TIMER_A0_PWM_DutyCycle(dutyCycle, 4);
+		TIMER_A0_PWM_DutyCycle(0,3);
 }
 
 // Changes the Active Duty Cycle of the PWM for the DC Motor on TimerA2
@@ -62,4 +96,16 @@ void DCMotor_On(){
 void DCMotor_Off(){
 		P3->OUT &= ~BIT6;
 		P3->OUT &= ~BIT7;
+}
+
+void testMotorForward(double dutyCycle){
+		int i = 0;
+		DCMotor_On();
+		LeftMotorForward(dutyCycle);
+		for(i=0;i<10000000;i++);
+		RightMotorForward(dutyCycle);
+		for(i=0;i<10000000;i++);
+		DCMotor_Modify(dutyCycle);
+		for(i=0;i<10000000;i++);
+		DCMotor_Off();
 }

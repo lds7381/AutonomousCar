@@ -20,34 +20,35 @@ extern long CalcPeriodFromFrequency (double Hz);
 
 int main(void) {
     // Main Variables
-    BOOLEAN fastMode = TRUE;
-    BOOLEAN speedChange = TRUE;  // Car will need to Change speed of start (starts stopped)
+		uint16_t dcPeriod = 10000;    // Run at 10kHz Period
+    uint32_t sPeriod  = CalcPeriodFromFrequency(50);
+		uint16_t *lineData;
+		uint16_t *smoothLine;
+		int carpetCount 	= 0;
+		int onCarpet 			= 0;
+		int turnDir;
+		BOOLEAN move = TRUE;
     
     // Motor Control Variables
-    double dcDutyCycle = 0;       // Duty Cycle (0 so motors do not move, needed for both motors, will run at same duty cycle always)
-		double dcDutyCycleTurn = 0.16;
-    uint16_t dcPeriod = 10000;    // Run at 10kHz Period
-    uint32_t sPeriod = CalcPeriodFromFrequency(50);
-		char str[32];
-    double sDutyCycleMid = 0.0497;
-    double sDutyCycleR  = 0.0471;
+    double dcDutyCycle     = 0;       		// Duty Cycle (0 so motors do not move, needed for both motors, will run at same duty cycle always)
+		double dcDutyCycleTurn = 0.34;				// Turn speed for DC motors
+    double sDutyCycleMid 	 = 0.0497;
+		double slightLeft      = 0.0517;
+		double slightRight     = 0.0473; 
+		
+		// Current unused Vars
+		double sDutyCycleR  = 0.0471;
     double sDutyCycleL = 0.0521;
-		double slightLeft = 0.0512;
-		double slightRight = 0.0473;
-		double currentTurn;
-		int carpetCount = 0;
+//		double currentTurn;
+//		int avgLineData = 0;
+//		char turnstr[10];
+		double leftAvg;
+		double rightAvg;
+		double midAvg;
+//		uint16_t totAvg;
+//    int sum = 0;
+    char str[32];				// String used for uart printing
 		int i;
-		uint16_t *lineData;
-	  int avgLineData = 0;
-		int compare;
-	  char turnstr[10];
-		char oled[6] = "Deeba";
-		uint16_t leftAvg;
-		uint16_t rightAvg;
-		uint16_t midAvg;
-		uint16_t totAvg;
-		int sum = 0;
-		int onCarpet = 0;
 		
     // **** Initalization of Peripherals ****
     // Init Uart0
@@ -62,77 +63,101 @@ int main(void) {
     LineScanCamera_Init();
     // Init OLED
     //OLED_Init();
+		//OLED_Print(1, 1, (char *)"Hello World?");
     // **************************************
 		
+//		while(1){
+//			lineData = getCameraData();
+//			smoothLine = smoothData(lineData);
+//			leftAvg = getLeftAverage(smoothLine);
+//			rightAvg = getRightAverage(smoothLine);
+//			midAvg = getMidAverage(smoothLine);
+//			sprintf(str, "Left Avg: %f\t", leftAvg);
+//			uart0_put(str);
+//			sprintf(str, "Mid Avg: %f\t", midAvg);
+//			uart0_put(str);
+//			sprintf(str, "Right Avg: %f\n\r", rightAvg);
+//			uart0_put(str);
+//			for(i=0;i<1000500;i++);
+//		}
+		
 		uart0_put("Deeba is going!\n\r");
-		dcDutyCycle = 0.14;
+		//Set duty 
+		dcDutyCycle = 0.27;
+		
+		// **** Test Area ****
+		// Test Motor Foward Functionality
+		//testMotorForward(dcDutyCycle);
+//		while(1){		// hold here
+//			lineData = getCameraData();
+//			displayCameraData(lineData);
+//			for(i=0;i<100000;i++);
+//		}
+		
+		///*** MAIN CODE ****
 		
 		// Set servo striaght
 		Servo_Modify(sDutyCycleMid);
 		
-		// Start Motor
-		DCMotor_Modify(dcDutyCycle);
+		// Start Motors
 		DCMotor_On();
+		DCMotor_Modify(dcDutyCycle);
 		
-		while(1){
+		
+		// Main Loop
+		while(move){
+			// Get the Camera Data
 			lineData = getCameraData();
-			compare = compareLeftRight(lineData);
-			if(compare == -1){
-					DCMotor_Modify(dcDutyCycleTurn);
-					Servo_Modify(slightRight);
-			}
-			else if (compare == 1) {
-					DCMotor_Modify(dcDutyCycleTurn);
-					Servo_Modify(slightLeft);
-			}
-			else {
+			// Compare Left and Right Camera data to see if turn needed
+			turnDir = computeTurn(lineData);
+			// Use Compare to decide turn
+			switch (turnDir){
+				case 0:			// Staight
 					DCMotor_Modify(dcDutyCycle);
 					Servo_Modify(sDutyCycleMid);
+					break;
+				case 1:			// Slight Left
+					DCMotor_Modify(dcDutyCycleTurn);
+					Servo_Modify(slightLeft);
+					break;
+				case 2:			// Slight Right
+					DCMotor_Modify(dcDutyCycleTurn);
+					Servo_Modify(slightRight);
+					break;
+				case 3:			// Hard Left
+					DCMotor_Modify(dcDutyCycleTurn);
+					Servo_Modify(sDutyCycleL);
+					break;
+				case 4:			// Hard Right
+					DCMotor_Modify(dcDutyCycleTurn);
+					Servo_Modify(sDutyCycleR);
+					break;
+				case 5:			// Bad Data
+					DCMotor_Modify(dcDutyCycle);
+					Servo_Modify(sDutyCycleMid);
+					break;
 			}
+			
+			// Carpet Check
 			onCarpet = checkOnCarpet(lineData);
-			if(onCarpet == 1){
+			// Use carpet check data
+			switch (onCarpet){
+				case 1:
 					carpetCount++;
-					if(carpetCount >= 3){
-						DCMotor_Off();
+					// Check for atleast 3 carpet checks
+					if(carpetCount >= 5){
+						move = FALSE;
 					}
-			} else {
+					break;
+				case 0:
+					// Reset carpet count if dont see carpet
 					carpetCount = 0;
+					break;
 			}
+			//for(i=0;i<10000;i++);
+			// Display camera data on OLED
+			//displayCameraData(lineData);
 			
-		}
-		
-		
-//			midAvg = getMidAverage(lineData);
-//			if(midAvg <= 1000){
-//						DCMotor_Off();
-//			} 
-//************************			
-//			totAvg = getTotalAverage(lineData);
-//			if ( totAvg < 450){
-//					carpetCount++;
-//					if (carpetCount >= 5){
-//						DCMotor_Off();
-//					}
-//			}
-			
-//			for (i=0; i<128; i++){
-//					avgLineData += lineData[i];
-//			}
-//			avgLineData /= 128;
-//			sprintf(str, "Avg: %d\n\r", avgLineData);
-//			uart0_put(str);
-//			
-//			if (avgLineData >= 16000){
-//				Servo_Modify(sDutyCycleMid);
-//			}
-//			else if(avgLineData < 16000 && avgLineData > 15500){
-////				if(currentTurn + 0.004 >= sDutyCycleL){	
-////					currentTurn += 0.001;	
-////					Servo_Modify(currentTurn);
-////				}
-//				Servo_Modify(.0516);
-//			}
-//			else if (avgLineData < 15000){
-//					DCMotor_Off();
-//			}
-		}
+		} /* End Main Loop */
+		DCMotor_Off();
+}
