@@ -34,3 +34,4 @@ void DCMotor_Off(void);
 void testMotorForward(double dutyCycle);
 void PID_Init(pid_t* pidControl, float min, float max, float ki, float kp, float kd);
 float runServo_PID(pid_t* pidControl, float desiredPos, uint16_t* lineData);
+float getDutyCycleFromPos(int servoPos);

@@ -141,12 +141,11 @@ edges_t getPostionFromLineData(uint16_t* lineData){
 }
 
 int computeTurn(uint16_t* line){
-		int i;
-		
 		double leftAvg = getLeftAverage(line);
 		double rightAvg = getRightAverage(line);
 		double midAvg   = getMidAverage(line);
 		int turnDir = 0;
+//		int i;
 //		sprintf(str, "Left Avg: %f\t", leftAvg);
 //		uart0_put(str);
 //		sprintf(str, "Right Avg: %f\n\r", rightAvg);

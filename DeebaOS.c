@@ -43,7 +43,7 @@ int main(void) {
 //		int avgLineData = 0;
 //		char turnstr[10];
 //		uint16_t totAvg;
-//    	int sum = 0;
+//    int sum = 0;
 //		uint16_t smoothLine*;
 //		double dcDutyCycleTurn = 0.34;			// Turn speed for DC motors
 //		double slightLeft      = 0.0517;
@@ -73,53 +73,53 @@ int main(void) {
 		//OLED_Print(1, 1, (char *)"Hello World?");
     // **************************************		
 
-	///*** MAIN CODE ****
-	// Initalize PID DC Motor Control (min=0.15, max=0.30, ki=0.1, kp=0.4, kd=0.6)
-	PID_Init(pid_controlDC, 0.15, 0.30, 0.1, 0.4, 0.6);
-	// Initalize PID DC Motor Control (min=1.0, max=2.0, ki=0.1, kp=0.4, kd=0.6)
-	PID_Init(pid_controlServo, 0, 128, 0.1, 0.4, 0.6);
-	// Start Running the Car
-	uart0_put("Deeba is going!\n\r");
-	// Set servo striaght
-	Servo_Modify(sDutyCycleMid);
-	// Start Motors
-	DCMotor_On();
-	DCMotor_Modify(dcWantedDuty);
-		
-	// Main Loop
-	while(move){
-		/* ***** MOTOR PID ***** */
-		// Get PID new Duty Cycle
-		dcDutyCycle = runMotors_PID(pid_controlDC, dcWantedDuty);
-		// Update motor with new duty cycle
-		DCMotor_Modify(dcDutyCycle);
+		///*** MAIN CODE ****
+		// Initalize PID DC Motor Control (min=0.15, max=0.30, ki=0.1, kp=0.4, kd=0.6)
+		PID_Init(pid_controlDC, 0.15, 0.30, 0.1, 0.4, 0.6);
+		// Initalize PID DC Motor Control (min=1.0, max=2.0, ki=0.1, kp=0.4, kd=0.6)
+		PID_Init(pid_controlServo, 0, 128, 0.1, 0.4, 0.6);
+		// Start Running the Car
+		uart0_put("Deeba is going!\n\r");
+		// Set servo striaght
+		Servo_Modify(sDutyCycleMid);
+		// Start Motors
+		DCMotor_On();
+		DCMotor_Modify(dcWantedDuty);
+			
+		// Main Loop
+		while(move){
+			/* ***** MOTOR PID ***** */
+			// Get PID new Duty Cycle
+			dcDutyCycle = runMotors_PID(pid_controlDC, dcWantedDuty);
+			// Update motor with new duty cycle
+			DCMotor_Modify(dcDutyCycle);
 
-		/* ***** SERVO PID ***** */
-		// Get the Camera Data
-		lineData = getCameraData();
-		// Get new servo postition
-		servoPos = runServo_PID(pid_controlServo, wantedServoPos, lineData);
-		// get duty cyle from servoPos
-		sDutyCycle = getDutyCycleFromPos(servoPos);
-		// Update servo with new duty cycle
-		Servo_Modify(sDutyCycle);	
+			/* ***** SERVO PID ***** */
+			// Get the Camera Data
+			lineData = getCameraData();
+			// Get new servo postition
+			servoPos = runServo_PID(pid_controlServo, wantedServoPos, lineData);
+			// get duty cyle from servoPos
+			sDutyCycle = getDutyCycleFromPos(servoPos);
+			// Update servo with new duty cycle
+			Servo_Modify(sDutyCycle);	
 
-		/* ***** CARPET CHECK ***** */
-		onCarpet = checkOnCarpet(lineData);
-		// Use carpet check data
-		switch (onCarpet){
-			case 1:
-				carpetCount++;
-				// Check for atleast 3 carpet checks
-				if(carpetCount >= 5){
-					move = FALSE;
-				}
-			case 0:
-				// Reset carpet count if dont see carpet
-				carpetCount = 0;
-		}
-		// Small Delay
-		for(i=0;i<10000;i++);
-	} /* End Main Loop */
-	DCMotor_Off();
+			/* ***** CARPET CHECK ***** */
+			onCarpet = checkOnCarpet(lineData);
+			// Use carpet check data
+			switch (onCarpet){
+				case 1:
+					carpetCount++;
+					// Check for atleast 3 carpet checks
+					if(carpetCount >= 5){
+						move = FALSE;
+					}
+				case 0:
+					// Reset carpet count if dont see carpet
+					carpetCount = 0;
+			}
+			// Small Delay
+			for(i=0;i<10000;i++);
+		} /* End Main Loop */
+		DCMotor_Off();
 }
