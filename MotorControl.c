@@ -11,6 +11,47 @@
 #include "TimerA.h"
 #include "uart.h"
 
+#define PID (TRUE)
+
+#if PID TRUE
+typedef struct{
+	float max;
+	float min;
+	float error[3];		// Mapping: {n, n-1, n-2}
+	float integ;
+	float kp;
+	float ki;
+	float kd;
+} pid_t;
+
+// Initalization Funtion for PID Control
+void PID_Init(pid_t* pidControl, float min, float max, float ki, float kp, float kd);{
+	pidControl->min   = min;
+	pidControl->max   = max;
+	pidControl->ki    = ki;
+	pidControl->kp    = kp;
+	pidControl->kd    = kd;
+	pidControl->error = {0,0,0};
+	pidControl->integ = 0;
+}
+
+float runMotors_PID(pid_t pidControl, float desiredDutyCycle){
+	// Set up
+	float newDutyCyle;
+	float actualDutyCycle = 0;  // what is this going to be???
+	float err = desiredDutyCycle - actualDutyCycle;
+	pidControl->error[0] = err;
+	// Calculate new duty cycle
+	newDutyCyle = (pidControl->kp*error) + (pidControl->ki*((err - pidControl->error[1])/2)) + (pidControl->kd*(err-(2*pidControl->error[1])+pidControl->error[2]));
+	//            Propotional               Integrate                                           Derivative
+	// Set old errors
+	pidControl->error[2] = pidControl->error[1];
+	pidControl->error[1] = err;
+	// Return new duty cycle to motor
+	return newDutyCyle;
+}
+#endif
+
 // Initalization Function with paramters (will start the motor at required cycle)
 // Initalizes TimerA0
 void DCMotor_Init(uint16_t period, double dutyCycle){
