@@ -40,10 +40,14 @@ int main(void) {
 		double slightRight     = 0.0473; 
 		double sDutyCycleR  = 0.0471;
     	double sDutyCycleL = 0.0521;
+		double sDutyCycle;
 		double leftAvg;
 		double rightAvg;
 		double midAvg;
-		pid_t pid_control;
+		int servoPos;
+		int wantedServoPos  = 64;	// Desired Servo Position (64 is straight)
+		pid_t  pid_controlDC;		// Pid Control Variables for DC Motors
+		pid_t  pid_controlServo;	// Pid Control Variables for Servo
 			
 		// Current unused Vars
 //		double currentTurn;
@@ -71,8 +75,10 @@ int main(void) {
     // **************************************		
 
 	///*** MAIN CODE ****
-	// Initalize PID Control (min=0.15, max=0.30, ki=0.1, kp=0.4, kd=0.6)
-	PID_Init(pid_control, 0.15, 0.30, 0.1, 0.4, 0.6);
+	// Initalize PID DC Motor Control (min=0.15, max=0.30, ki=0.1, kp=0.4, kd=0.6)
+	PID_Init(pid_controlDC, 0.15, 0.30, 0.1, 0.4, 0.6);
+	// Initalize PID DC Motor Control (min=1.0, max=2.0, ki=0.1, kp=0.4, kd=0.6)
+	PID_Init(pid_controlServo, 0, 128, 0.1, 0.4, 0.6);
 	// Start Running the Car
 	uart0_put("Deeba is going!\n\r");
 	// Set servo striaght
@@ -83,38 +89,23 @@ int main(void) {
 		
 	// Main Loop
 	while(move){
+		/* ***** MOTOR PID ***** */
 		// Get PID new Duty Cycle
-		dcDutyCycle = runMotors_PID(PID_Init, dcWantedDuty);
+		dcDutyCycle = runMotors_PID(pid_controlDC, dcWantedDuty);
 		// Update motor with new duty cycle
 		DCMotor_Modify(dcDutyCycle);
 
+		/* ***** SERVO PID ***** */
 		// Get the Camera Data
 		lineData = getCameraData();
-		// Compare Left and Right Camera data to see if turn needed
-		turnDir = computeTurn(lineData);
-		// Use Compare to decide turn
-		switch (turnDir){
-			case 0:			// Staight
-				Servo_Modify(sDutyCycleMid);
-				break;
-			case 1:			// Slight Left
-				Servo_Modify(slightLeft);
-				break;
-			case 2:			// Slight Right
-				Servo_Modify(slightRight);
-				break;
-			case 3:			// Hard Left
-				Servo_Modify(sDutyCycleL);
-				break;
-			case 4:			// Hard Right
-				Servo_Modify(sDutyCycleR);
-				break;
-			case 5:			// Bad Data
-				Servo_Modify(sDutyCycleMid);
-				break;
-		}
-		
-		// Carpet Check
+		// Get new servo postition
+		servoPos = runServo_PID(pid_controlServo, wantedServoPos, lineData);
+		// get duty cyle from servoPos
+		sDutyCycle = getDutyCycleFromPos(servoPos);
+		// Update servo with new duty cycle
+		Servo_Modify(sDutyCycle);	
+
+		/* ***** CARPET CHECK ***** */
 		onCarpet = checkOnCarpet(lineData);
 		// Use carpet check data
 		switch (onCarpet){
@@ -130,10 +121,8 @@ int main(void) {
 				carpetCount = 0;
 				break;
 		}
-		//for(i=0;i<10000;i++);
-		// Display camera data on OLED
-		//displayCameraData(lineData);
-		
+		// Small Delay
+		for(i=0;i<10000;i++);
 	} /* End Main Loop */
 	DCMotor_Off();
 }
