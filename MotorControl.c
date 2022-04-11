@@ -19,6 +19,14 @@ void DCMotor_Init(uint16_t period, double dutyCycle){
         if (ret != 0){
             uart0_put("Warning: DC Motor 1 Failed to Initialize!");
 		}
+		ret = TIMER_A0_PWM_Init(period, dutyCycle, 2);
+        if (ret != 0){
+            uart0_put("Warning: DC Motor 1 Failed to Initialize!");
+		}
+		ret = TIMER_A0_PWM_Init(period, dutyCycle, 3);
+        if (ret != 0){
+            uart0_put("Warning: DC Motor 2 Failed to Initialize!");
+		}
     ret = TIMER_A0_PWM_Init(period, dutyCycle, 4);
         if (ret != 0){
             uart0_put("Warning: DC Motor 2 Failed to Initialize!");
@@ -46,34 +54,46 @@ void Servo_Init(uint32_t period, double dutyCycle){
 		}
 }
 
-
-void RightMotorForward(double dutyCycle){
-		TIMER_A0_PWM_DutyCycle(dutyCycle,4);
-		TIMER_A0_PWM_DutyCycle(0,1);
-		TIMER_A0_PWM_DutyCycle(0,2);
-		TIMER_A0_PWM_DutyCycle(0,3);
-}
-
 void LeftMotorBackward(double dutyCycle){
-		TIMER_A0_PWM_DutyCycle(dutyCycle, 2);
-		TIMER_A0_PWM_DutyCycle(0,1);
-		TIMER_A0_PWM_DutyCycle(0,3);
-		TIMER_A0_PWM_DutyCycle(0,4);
-}
-
-void RightMotorBackward(double dutyCycle){
-		TIMER_A0_PWM_DutyCycle(dutyCycle,3);
-		TIMER_A0_PWM_DutyCycle(0,4);
-		TIMER_A0_PWM_DutyCycle(0,1);
-		TIMER_A0_PWM_DutyCycle(0,2);
+	TIMER_A0_PWM_DutyCycle(dutyCycle,3); 
+	TIMER_A0_PWM_DutyCycle(0,2);
+	TIMER_A0_PWM_DutyCycle(0,1);
+	TIMER_A0_PWM_DutyCycle(0,4);
 }
 
 void LeftMotorForward(double dutyCycle){
-		TIMER_A0_PWM_DutyCycle(dutyCycle,1);
-		TIMER_A0_PWM_DutyCycle(0,2);
-		TIMER_A0_PWM_DutyCycle(0,3);
-		TIMER_A0_PWM_DutyCycle(0,4);
+	TIMER_A0_PWM_DutyCycle(dutyCycle, 4); 
+	TIMER_A0_PWM_DutyCycle(0,2);
+	TIMER_A0_PWM_DutyCycle(0,3);
+	TIMER_A0_PWM_DutyCycle(0,1);
 }
+
+void RightMotorBackward(double dutyCycle){
+	TIMER_A0_PWM_DutyCycle(dutyCycle, 1); 
+	TIMER_A0_PWM_DutyCycle(0,2);
+	TIMER_A0_PWM_DutyCycle(0,3);
+	TIMER_A0_PWM_DutyCycle(0,4);
+}
+
+void RightMotorForward(double dutyCycle){
+	TIMER_A0_PWM_DutyCycle(dutyCycle, 2); // M2B
+	TIMER_A0_PWM_DutyCycle(0,3);
+	TIMER_A0_PWM_DutyCycle(0,4);
+	TIMER_A0_PWM_DutyCycle(0,1);
+}
+
+void LeftMotorOff(){
+	P3->OUT &= ~BIT7; // Set M1EN
+	TIMER_A0_PWM_DutyCycle(0, 1); // M1A 0% pwm
+	TIMER_A0_PWM_DutyCycle(0, 2); // M1B 0% pwm
+}
+
+void RightMotorOff(){
+	P3->OUT &= ~BIT6; // Set M1EN
+	TIMER_A0_PWM_DutyCycle(0, 3); // M1A 0% pwm
+	TIMER_A0_PWM_DutyCycle(0, 4); // M1B 0% pwm
+}
+
 
 // Changes the Active Duty Cycle of the PWM for the DC Motor on TimerA0
 void DCMotor_Modify(double dutyCycle){

@@ -19,6 +19,8 @@ void RightMotorForward(double dutyCycle);
 void RightMotorBackward(double dutyCycle);
 void LeftMotorForward(double dutyCycle);
 void LeftMotorBackward(double dutyCycle);
+void LeftMotorOff(void);
+void RightMotorOff(void);
 void DCMotor_On(void);
 void DCMotor_Off(void);
 void testMotorForward(double dutyCycle);

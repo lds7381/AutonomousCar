@@ -39,7 +39,7 @@ int TIMER_A0_PWM_Init(uint16_t period, double percentDutyCycle, uint16_t pin)
     // Timer A0.2
 	else if (pin == 2)
 	{
-    	P2->SEL0 |= ~BIT5;		// Initailize for GPIO
+    	P2->SEL0 |= BIT5;		// Initailize for GPIO
 		P2->SEL1 &= ~BIT5;
 		P2->DIR  |=  BIT5;		// Set direction to output
 		P2->DS  |=  BIT5;		// High Drive stregnth
@@ -67,27 +67,25 @@ int TIMER_A0_PWM_Init(uint16_t period, double percentDutyCycle, uint16_t pin)
 	DEFAULT_PERIOD_A0[pin] = period;
 
 	// Stop the Timer For Initialization
-	if (pin == 1)
-		TIMER_A0->CCR[0] = 0;
+	TIMER_A0->CCR[0] = 0;
+	
+	// set the duty cycle
+	dutyCycle_A0 = (uint16_t) (percentDutyCycle * (double)DEFAULT_PERIOD_A0[pin]);
+	
+	// CCR[n] contains the dutyCycle just calculated, where n is the pin number
+  	//TIMER_A0->CCR[pin]
+  	TIMER_A0->CCR[pin] = dutyCycle_A0;
 
 	// TIMER_A0->CCTL[pin]
 	// Sync compare input high, Output mode Reset/Set 
   	TIMER_A0->CCTL[pin] = 0x04e1;
 	
-	// set the duty cycle
-	dutyCycle_A0 = (uint16_t) (percentDutyCycle * (double)DEFAULT_PERIOD_A0[pin]);
-
-	// CCR[n] contains the dutyCycle just calculated, where n is the pin number
-  	//TIMER_A0->CCR[pin]
-  	TIMER_A0->CCR[pin] = dutyCycle_A0;
-	
 	// Timer CONTROL register
 	// TIMER_A0->CTL
-	TIMER_A0->CTL |= 0x211; 
+	TIMER_A0->CTL = 0x210; 
 
 	// Start the timer by inputting the counter value
-	if (pin == 1)
-		TIMER_A0->CCR[0] = DEFAULT_PERIOD_A0[pin];
+	TIMER_A0->CCR[0] = DEFAULT_PERIOD_A0[pin];
 
 	return 0;
 }
