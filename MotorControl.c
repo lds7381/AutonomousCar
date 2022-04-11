@@ -10,6 +10,101 @@
 #include <stdlib.h>
 #include "TimerA.h"
 #include "uart.h"
+#include "Common.h"
+#include "MotorControl.h"
+#include "Camera.h"
+
+#define PID (TRUE)
+
+// Initalization Funtion for PID Control
+void PID_Init(pid_t* pidControl, float min, float max, float ki, float kp, float kd){
+	pidControl->min   	 = min;
+	pidControl->max      = max;
+	pidControl->ki       = ki;
+	pidControl->kp    	 = kp;
+	pidControl->kd    	 = kd;
+	pidControl->error[0] = 0;
+	pidControl->error[1] = 0;
+	pidControl->error[2] = 0;
+	pidControl->integ    = 0;
+}
+
+float runMotors_PID(pid_t* pidControl, float desiredDutyCycle){
+	// Set up
+	float newDutyCyle;
+	float actualDutyCycle = 0;  // what is this going to be???
+	float err;
+	// Get error and set to pidControl
+	err = desiredDutyCycle - actualDutyCycle;	
+	pidControl->error[0] = err;
+	// Add to integration value
+	if (err <= pidControl->max){		// Check to make sure the error isnt above the max value
+		pidControl->integ = pidControl->integ + err;
+	}
+	else{
+		pidControl->integ = 0;
+	}
+	// Calculate new duty cycle
+	newDutyCyle = (pidControl->kp*err) + (pidControl->ki*pidControl->integ) + (pidControl->kd*(err-pidControl->error[1]));
+	//            Propotional            Integrate                            Derivative
+	// Might need a clip here from (-1.0 to 1.0)
+	// Set old errors
+	pidControl->error[2] = pidControl->error[1];
+	pidControl->error[1] = err;
+	// Return new duty cycle to motor
+	return newDutyCyle;
+}
+
+float runServo_PID(pid_t* pidControl, float desiredPos, uint16_t* lineData){
+	// Set up
+	float newPos;
+	edges_t edges;   // This willl come from camera data
+	int actualPos; 
+	float err;
+	
+	// Get actual Position
+	edges = getPostionFromLineData(lineData);
+	actualPos = edges.midPos;
+	// Get error and set pidControl
+	err = desiredPos - actualPos;
+	pidControl->error[0] = err;
+	// Add to integration value
+	if (err <= pidControl->max){		// Check to make sure the error isnt above the max value
+		pidControl->integ = pidControl->integ + err;
+	}
+	else {
+		pidControl->integ = 0;
+	}
+	// Calculate the new servo position
+	newPos = (pidControl->kp*err) + (pidControl->ki*pidControl->integ) + (pidControl->kd*(err-pidControl->error[1]));
+	//       Propotional            Integrate                            Derivative
+	// Might need a clip here from (0 to 127)
+	// Set old errors
+	pidControl->error[2] = pidControl->error[1];
+	pidControl->error[1] = err;
+	// Return new duty cycle to motor
+	return newPos;
+}
+
+float getDutyCycleFromPos(int servoPos){
+	// Max Right: 0.0471 Max Left: 0.0521 Mid: 0.0496
+	float a = 0.0471;
+	float b = 0.0521;
+	float x = (float)servoPos;
+	float xmax = 127;
+	float xmin = 0;
+	float sDutyCycle;
+	// Calculate the normalized duty cycle from position
+	sDutyCycle = (b-a)*((x - xmin)/(xmax - xmin))+a;
+	// Return new servo duty cycle from pid position
+	if (sDutyCycle > b){
+		sDutyCycle = b;
+	}
+	else if (sDutyCycle < a) {
+		sDutyCycle = a;
+	}
+	return sDutyCycle;
+}
 
 // Initalization Function with paramters (will start the motor at required cycle)
 // Initalizes TimerA0

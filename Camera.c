@@ -6,11 +6,11 @@
                  Will Init and Run the Camera, utilizes I2C Protocol.
 */
 
-
 #include "Common.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include "Camera.h"
 #include "ControlPins.h"
 #include "CortexM.h"
 #include "msp432p4011.h"
@@ -22,8 +22,6 @@ uint16_t line[128];
 uint16_t smoothLine[128];
 BOOLEAN dataAvaliable = FALSE;
 char str[10];
-
-
 
 void LineScanCamera_Init(){
     DisableInterrupts();    // Stop Interrupts
@@ -87,13 +85,67 @@ uint16_t getTotalAverage(uint16_t* line){
 		return averageTotal/128;
 }
 
+edges_t getPostionFromLineData(uint16_t* lineData){
+	int i;
+	int edgeTolerance = 2400;	// minimum value for the edge to be detected
+	edges_t edges;
+	BOOLEAN leftEdge = FALSE;
+	BOOLEAN rightEdge = FALSE;
+
+	// Check Left and Right sides to check if edges are there
+	if(lineData[0] > 2400){
+		edges.leftPos = -1;
+		leftEdge = TRUE;
+
+	}
+	if(lineData[127] > 2400){
+		edges.rightPos = -1;
+		rightEdge = TRUE;
+	}
+
+	// If no edges detected mid pos is the center (64)
+	if(leftEdge && rightEdge){
+		edges.midPos = 64;
+		return edges;	
+	}
+	else{
+		// Iterate though the full line data to get left edge
+		if(!leftEdge){
+			for(i=0;i<128;i++){
+				if ((lineData[i] > edgeTolerance) && !leftEdge){
+					edges.leftPos = (i+1); 
+					break;
+				}
+			}
+		}
+		// Iterate backwards through line data to get right edge
+		if(!rightEdge){
+			for(i=127;i>=0;i--){
+				if ((lineData[i] > edgeTolerance) && !rightEdge){
+					edges.rightPos = (i+1); 
+					break;
+				}
+			}
+		}
+		if(!rightEdge && !leftEdge){
+			edges.midPos = (edges.leftPos+edges.rightPos)/2;
+		}
+		else if (!rightEdge && leftEdge){
+			edges.midPos = edges.rightPos/2;
+		}
+		else if (rightEdge && !leftEdge){
+			edges.midPos = edges.leftPos/2;
+		}
+		return edges;
+	}
+}
+
 int computeTurn(uint16_t* line){
-		int i;
-		
 		double leftAvg = getLeftAverage(line);
 		double rightAvg = getRightAverage(line);
 		double midAvg   = getMidAverage(line);
 		int turnDir = 0;
+//		int i;
 //		sprintf(str, "Left Avg: %f\t", leftAvg);
 //		uart0_put(str);
 //		sprintf(str, "Right Avg: %f\n\r", rightAvg);
