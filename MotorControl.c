@@ -72,16 +72,15 @@ double runServo_PID(pid_t* pidControl, double desiredPos, uint16_t* lineData){
 	err = desiredPos - actualPos;
 	pidControl->error[0] = err;
 	// Add to integration value
-	if (err <= pidControl->max){		// Check to make sure the error isnt above the max value
+	if (err <= pidControl->max && err >= pidControl->min){		// Check to make sure the error isnt above the max value
 		pidControl->integ = pidControl->integ + err;
 	}
 	else {
 		pidControl->integ = 0;
 	}
 	// Calculate the new servo position
-	newPos = actualPos + (pidControl->kp*err)+ (pidControl->ki*pidControl->integ)  + (pidControl->kd*(err-pidControl->error[1]));
+	newPos = desiredPos + (pidControl->kp*err)+ (pidControl->ki*pidControl->integ) + (pidControl->kd*(err-pidControl->error[1]));
 	//       							Propotional            Integrate                            Derivative
-	// Might need a clip here from (0 to 127)
 	// Set old errors
 	pidControl->error[2] = pidControl->error[1];
 	pidControl->error[1] = err;
@@ -100,7 +99,7 @@ double getDutyCycleFromPos(int servoPos){
 	double a = 0.0471;
 	double b = 0.0521;
 	double x = (float)servoPos;
-	double xmax = 127;
+	double xmax = 126;
 	double xmin = 0;
 	double sDutyCycle;
 	// Calculate the normalized duty cycle from position

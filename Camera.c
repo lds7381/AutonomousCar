@@ -87,7 +87,7 @@ uint16_t getTotalAverage(uint16_t* line){
 
 edges_t getPostionFromLineData(uint16_t* lineData){
 	int i;
-	int edgeTolerance = 7000;	// minimum value for the edge to be detected
+	int edgeTolerance = 3000;	// minimum value for the edge to be detected
 	edges_t edges;
 	BOOLEAN leftEdge = FALSE;
 	BOOLEAN rightEdge = FALSE;
@@ -111,22 +111,48 @@ edges_t getPostionFromLineData(uint16_t* lineData){
 //	else{
 		// Iterate though the full line data to get left edge
 		if(!leftEdge){
+//			uart0_put("L: ");
 			for(i=0;i<128;i++){
+//				if(i<10){
+//					sprintf(str, "%d-", lineData[i]);
+//					uart0_put(str);
+//				}
 				if ((lineData[i] > edgeTolerance) && !leftEdge){
 					edges.leftPos = (i+1); 
+					leftEdge = TRUE;
 					break;
 				}
+			}
+			if (!leftEdge){
+				edges.leftPos = 0;
 			}
 		}
 		// Iterate backwards through line data to get right edge
 		if(!rightEdge){
-			for(i=127;i>=0;i--){
+//			uart0_put("R: ");
+			for(i=126;i>=0;i--){
+//				if(i>117){
+//					sprintf(str, "%d-", lineData[i]);
+//					uart0_put(str);
+//				}
 				if ((lineData[i] > edgeTolerance) && !rightEdge){
-					edges.rightPos = (i+1); 
+					edges.rightPos = (i); 
+					rightEdge = TRUE;
 					break;
 				}
 			}
+			if (!rightEdge){
+				edges.rightPos = 127;
+			}
 		}
+		
+		// Right edge overflow
+		if(edges.leftPos > edges.rightPos){
+				edges.rightPos = 2;
+				edges.leftPos = edges.rightPos-2;
+				
+		}
+		
 		edges.midPos = (edges.leftPos+edges.rightPos)/2;
 		return edges;
 }

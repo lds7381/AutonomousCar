@@ -29,7 +29,7 @@ int main(void) {
 		int i;
     
     // Motor Control Variables
-    double dcDutyCycle     = 0.3;       		// Duty Cycle (0 so motors do not move, needed for both motors, will run at same duty cycle always)
+    double dcDutyCycle     = 0.24;       		// Duty Cycle (0 so motors do not move, needed for both motors, will run at same duty cycle always)
 		double dcWantedDuty    = 0.23;
 		int wantedServoPos     = 64;			// Desired Servo Position (64 is straight)
 		double sDutyCycle;
@@ -55,9 +55,7 @@ int main(void) {
 //   	double sDutyCycleL = 0.0521;	
 //		double leftAvg;
 //		double rightAvg;
-//		double midAvg;
-
-    	
+//		double midAvg;	
 		
     // **** Initalization of Peripherals ****
     // Init Uart0
@@ -67,7 +65,7 @@ int main(void) {
     // Init DC Motors
     DCMotor_Init(dcPeriod, 0);  
     // Init Servo Motor
-    Servo_Init(sPeriod, 0);  // Servo One (only one)
+    Servo_Init(sPeriod, sDutyCycleMid);  // Servo One (only one)
     // Init Camera
     LineScanCamera_Init();
     // Init OLED
@@ -78,8 +76,8 @@ int main(void) {
 		///*** MAIN CODE ****
 		// Initalize PID DC Motor Control (min=0.15, max=0.30, ki=0.1, kp=0.4, kd=0.6)
 		PID_Init(&pid_controlDC, 0.15, 0.30, 0.1, 0.4, 0.6);
-		// Initalize PID DC Motor Control (min=1.0, max=2.0, ki=0.1, kp=0.4, kd=0.6)
-		PID_Init(&pid_controlServo, -5.0, 5.0, 0.9, 0.4, 0.2);
+		// Initalize PID DC Motor Control (min=-2.5, max=2.5, ki=0.12, kp=0.97, kd=0.08)
+		PID_Init(&pid_controlServo, -2.5, 2.5, 0.12, 0.97, 0.08);
 		// Start Running the Car
 		uart0_put("Deeba is going!\n\r");
 		// Set servo striaght
@@ -109,7 +107,7 @@ int main(void) {
 			// Print PID Values
 			//sprintf(str, "Servo PID: %f, new Pos: %d\r\n", sDutyCycle, servoPos);
 			//uart0_put(str);
-			for(i=0;i<100000;i++);
+			//for(i=0;i<100000;i++);
 			Servo_Modify(sDutyCycle);	
 
 			/* ***** CARPET CHECK ***** */
@@ -119,7 +117,7 @@ int main(void) {
 				case 1:
 					carpetCount++;
 					// Check for atleast 3 carpet checks
-					if(carpetCount >= 5){
+					if(carpetCount >= 3){
 						move = FALSE;
 					}
 				case 0:
