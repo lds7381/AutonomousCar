@@ -27,5 +27,4 @@ double getMidAverage(uint16_t* line);
 uint16_t getTotalAverage(uint16_t* line);
 int checkOnCarpet(uint16_t* line);
 void displayCameraData(uint16_t* line);
-float runMotors_PID(pid_t* pidControl, float desiredDutyCycle);
 edges_t getPostionFromLineData(uint16_t* lineData);

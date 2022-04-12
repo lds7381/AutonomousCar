@@ -12,13 +12,13 @@
 
 //typedef struct pit_struct pid_t;
 typedef struct{
-	float max;
-	float min;
-	float error[3];		// Mapping: {n, n-1, n-2}
-	float integ;
-	float kp;
-	float ki;
-	float kd;
+	double max;
+	double min;
+	double error[3];		// Mapping: {n, n-1, n-2}
+	double integ;
+	double kp;
+	double ki;
+	double kd;
 } pid_t;
 
 void DCMotor_Init(uint16_t period, double dutyCycle);
@@ -34,6 +34,7 @@ void RightMotorOff(void);
 void DCMotor_On(void);
 void DCMotor_Off(void);
 void testMotorForward(double dutyCycle);
-void PID_Init(pid_t* pidControl, float min, float max, float ki, float kp, float kd);
-float runServo_PID(pid_t* pidControl, float desiredPos, uint16_t* lineData);
-float getDutyCycleFromPos(int servoPos);
+void PID_Init(pid_t* pidControl, double min, double max, double ki, double kp, double kd);
+double runServo_PID(pid_t* pidControl, double desiredPos, uint16_t* lineData);
+double getDutyCycleFromPos(int servoPos);
+double runMotors_PID(pid_t* pidControl, double desiredDutyCycle);

@@ -29,14 +29,17 @@ int main(void) {
 		int i;
     
     // Motor Control Variables
-    double dcDutyCycle     = 0;       		// Duty Cycle (0 so motors do not move, needed for both motors, will run at same duty cycle always)
+    double dcDutyCycle     = 0.3;       		// Duty Cycle (0 so motors do not move, needed for both motors, will run at same duty cycle always)
 		double dcWantedDuty    = 0.23;
 		int wantedServoPos     = 64;			// Desired Servo Position (64 is straight)
 		double sDutyCycle;
 		double sDutyCycleMid   = 0.0497;
 		int servoPos;
-		pid_t*  pid_controlDC;		// Pid Control Variables for DC Motors
-		pid_t*  pid_controlServo;	// Pid Control Variables for Servo
+		pid_t  pid_controlDC;		// Pid Control Variables for DC Motors
+		pid_t  pid_controlServo;	// Pid Control Variables for Servo
+	
+	
+		char str[32];				// String used for uart printing
 			
 		// Current unused Vars
 //		double currentTurn;
@@ -53,7 +56,7 @@ int main(void) {
 //		double leftAvg;
 //		double rightAvg;
 //		double midAvg;
-//		char str[32];				// String used for uart printing
+
     	
 		
     // **** Initalization of Peripherals ****
@@ -63,7 +66,6 @@ int main(void) {
     ADC0_InitSWTriggerCh6();
     // Init DC Motors
     DCMotor_Init(dcPeriod, 0);  
-		for(i=0;i<100000;i++);		// Give a delay for PWM to be set up
     // Init Servo Motor
     Servo_Init(sPeriod, 0);  // Servo One (only one)
     // Init Camera
@@ -75,33 +77,39 @@ int main(void) {
 
 		///*** MAIN CODE ****
 		// Initalize PID DC Motor Control (min=0.15, max=0.30, ki=0.1, kp=0.4, kd=0.6)
-		PID_Init(pid_controlDC, 0.15, 0.30, 0.1, 0.4, 0.6);
+		PID_Init(&pid_controlDC, 0.15, 0.30, 0.1, 0.4, 0.6);
 		// Initalize PID DC Motor Control (min=1.0, max=2.0, ki=0.1, kp=0.4, kd=0.6)
-		PID_Init(pid_controlServo, 0, 128, 0.1, 0.4, 0.6);
+		PID_Init(&pid_controlServo, -5.0, 5.0, 0.9, 0.4, 0.2);
 		// Start Running the Car
 		uart0_put("Deeba is going!\n\r");
 		// Set servo striaght
 		Servo_Modify(sDutyCycleMid);
 		// Start Motors
 		DCMotor_On();
-		DCMotor_Modify(dcWantedDuty);
+		DCMotor_Modify(dcDutyCycle);
 			
 		// Main Loop
 		while(move){
 			/* ***** MOTOR PID ***** */
 			// Get PID new Duty Cycle
-			dcDutyCycle = runMotors_PID(pid_controlDC, dcWantedDuty);
+			//dcDutyCycle = runMotors_PID(pid_controlDC, dcWantedDuty);
 			// Update motor with new duty cycle
-			DCMotor_Modify(dcDutyCycle);
+			// Print PID Values
+			//sprintf(str, "Motor PID: %f", dcDutyCycle);
+			//DCMotor_Modify(dcDutyCycle);
 
 			/* ***** SERVO PID ***** */
 			// Get the Camera Data
 			lineData = getCameraData();
 			// Get new servo postition
-			servoPos = runServo_PID(pid_controlServo, wantedServoPos, lineData);
+			servoPos = runServo_PID(&pid_controlServo, wantedServoPos, lineData);
 			// get duty cyle from servoPos
 			sDutyCycle = getDutyCycleFromPos(servoPos);
 			// Update servo with new duty cycle
+			// Print PID Values
+			//sprintf(str, "Servo PID: %f, new Pos: %d\r\n", sDutyCycle, servoPos);
+			//uart0_put(str);
+			for(i=0;i<100000;i++);
 			Servo_Modify(sDutyCycle);	
 
 			/* ***** CARPET CHECK ***** */
@@ -118,8 +126,6 @@ int main(void) {
 					// Reset carpet count if dont see carpet
 					carpetCount = 0;
 			}
-			// Small Delay
-			for(i=0;i<10000;i++);
 		} /* End Main Loop */
 		DCMotor_Off();
 }

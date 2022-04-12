@@ -87,28 +87,28 @@ uint16_t getTotalAverage(uint16_t* line){
 
 edges_t getPostionFromLineData(uint16_t* lineData){
 	int i;
-	int edgeTolerance = 2400;	// minimum value for the edge to be detected
+	int edgeTolerance = 7000;	// minimum value for the edge to be detected
 	edges_t edges;
 	BOOLEAN leftEdge = FALSE;
 	BOOLEAN rightEdge = FALSE;
 
 	// Check Left and Right sides to check if edges are there
-	if(lineData[0] > 2400){
-		edges.leftPos = -1;
-		leftEdge = TRUE;
+//	if(lineData[0] > 2400){
+//		edges.leftPos = 0;
+//		leftEdge = TRUE;
 
-	}
-	if(lineData[127] > 2400){
-		edges.rightPos = -1;
-		rightEdge = TRUE;
-	}
+//	}
+//	if(lineData[127] > 2400){
+//		edges.rightPos = 127;
+//		rightEdge = TRUE;
+//	}
 
-	// If no edges detected mid pos is the center (64)
-	if(leftEdge && rightEdge){
-		edges.midPos = 64;
-		return edges;	
-	}
-	else{
+//	// If no edges detected mid pos is the center (64)
+//	if(leftEdge && rightEdge){
+//		edges.midPos = 64;
+//		return edges;	
+//	}
+//	else{
 		// Iterate though the full line data to get left edge
 		if(!leftEdge){
 			for(i=0;i<128;i++){
@@ -127,17 +127,8 @@ edges_t getPostionFromLineData(uint16_t* lineData){
 				}
 			}
 		}
-		if(!rightEdge && !leftEdge){
-			edges.midPos = (edges.leftPos+edges.rightPos)/2;
-		}
-		else if (!rightEdge && leftEdge){
-			edges.midPos = edges.rightPos/2;
-		}
-		else if (rightEdge && !leftEdge){
-			edges.midPos = edges.leftPos/2;
-		}
+		edges.midPos = (edges.leftPos+edges.rightPos)/2;
 		return edges;
-	}
 }
 
 int computeTurn(uint16_t* line){
