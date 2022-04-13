@@ -29,28 +29,48 @@ void PID_Init(pid_t* pidControl, double min, double max, double ki, double kp, d
 	pidControl->integ    = 0.0;
 }
 
-double runMotors_PID(pid_t* pidControl, double desiredDutyCycle){
+double runMotors_PID(pid_t* pidControl, double desiredDutyCycle, int servoPos){
 	// Set up
 	double newDutyCyle;
-	double actualDutyCycle = 0;  // what is this going to be???
+	double baseDutyCycle = 0.20;
+	double actualDutyCycle;
 	double err;
+	char str[50];
+	
+	if(servoPos > 55 && servoPos < 75){
+			actualDutyCycle = baseDutyCycle;
+	}
+	else {
+			actualDutyCycle = desiredDutyCycle;
+	}
+	
 	// Get error and set to pidControl
 	err = desiredDutyCycle - actualDutyCycle;	
 	pidControl->error[0] = err;
 	// Add to integration value
-	if (err <= pidControl->max){		// Check to make sure the error isnt above the max value
+	if (err <= pidControl->max || err >= pidControl->min){		// Check to make sure the error isnt above the max value
 		pidControl->integ = pidControl->integ + err;
 	}
 	else{
 		pidControl->integ = 0;
 	}
 	// Calculate new duty cycle
-	newDutyCyle = (pidControl->kp*err) + (pidControl->ki*pidControl->integ) + (pidControl->kd*(err-pidControl->error[1]));
-	//            Propotional            Integrate                            Derivative
-	// Might need a clip here from (-1.0 to 1.0)
+	newDutyCyle = baseDutyCycle + (pidControl->kp*err) + (pidControl->ki*pidControl->integ) + (pidControl->kd*(err-pidControl->error[1]));
+	//            Offset						Propotional            Integrate                            Derivative
+	// Clip newDutyCycle
+	if(newDutyCyle > desiredDutyCycle){
+			newDutyCyle = desiredDutyCycle;
+	}
+	else if (newDutyCyle < baseDutyCycle){
+			newDutyCyle = baseDutyCycle;
+	}
+	// Print testing
+	sprintf(str, "ServoPos: %d, New: %f\r\n", servoPos, newDutyCyle);
+	uart0_put(str);
 	// Set old errors
 	pidControl->error[2] = pidControl->error[1];
 	pidControl->error[1] = err;
+	pidControl->error[0] = 0;
 	// Return new duty cycle to motor
 	return newDutyCyle;
 }
@@ -80,7 +100,7 @@ double runServo_PID(pid_t* pidControl, double desiredPos, uint16_t* lineData){
 	}
 	// Calculate the new servo position
 	newPos = desiredPos + (pidControl->kp*err)+ (pidControl->ki*pidControl->integ) + (pidControl->kd*(err-pidControl->error[1]));
-	//       							Propotional            Integrate                            Derivative
+	//       Offset				Propotional            Integrate                            Derivative
 	// Set old errors
 	pidControl->error[2] = pidControl->error[1];
 	pidControl->error[1] = err;
@@ -99,7 +119,7 @@ double getDutyCycleFromPos(int servoPos){
 	double a = 0.0471;
 	double b = 0.0521;
 	double x = (float)servoPos;
-	double xmax = 126;
+	double xmax = 128;
 	double xmin = 0;
 	double sDutyCycle;
 	// Calculate the normalized duty cycle from position
@@ -200,7 +220,7 @@ void RightMotorOff(){
 
 // Changes the Active Duty Cycle of the PWM for the DC Motor on TimerA0
 void DCMotor_Modify(double dutyCycle){
-    TIMER_A0_PWM_DutyCycle(dutyCycle, 2);
+		TIMER_A0_PWM_DutyCycle(dutyCycle, 2);
 		TIMER_A0_PWM_DutyCycle(dutyCycle, 4);
 		TIMER_A0_PWM_DutyCycle(0, 3);
 		TIMER_A0_PWM_DutyCycle(0, 1);
@@ -228,7 +248,7 @@ void testMotorForward(double dutyCycle){
 		for(i=0;i<10000000;i++);
 		RightMotorForward(dutyCycle);
 		for(i=0;i<10000000;i++);
-		DCMotor_Modify(dutyCycle);
+//		DCMotor_Modify(dutyCycle);
 		for(i=0;i<10000000;i++);
 		DCMotor_Off();
 }
