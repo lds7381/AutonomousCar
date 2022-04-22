@@ -73,7 +73,7 @@ int main(void) {
 
 		///*** MAIN CODE ****
 		// Initalize PID Servo Motor Control (min=-2.5, max=2.5, ki=0.12, kp=0.97, kd=0.08)
-		PID_Init(&pid_controlServo, -2.5, 2.5, 0.12, 0.97, 0.7);
+		PID_Init(&pid_controlServo, -2.5, 2.5, 0.1, 1.5, 0.8);
 		// Start Running the Car
 		uart0_put("Deeba is going!\n\r");
 		// Set servo striaght
