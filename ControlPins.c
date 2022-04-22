@@ -10,7 +10,7 @@
 extern uint32_t SystemCoreClock;
 // default SI integration time is 7.5ms = 133Hz
 //
-#define INTEGRATION_TIME .0075f
+#define INTEGRATION_TIME .0150f
 //was 0.075
 
 
