@@ -28,7 +28,7 @@ int main(void) {
 		uint16_t* lineData;
     
     // Motor Control Variables
-    double dcDutyCycle     = 0.24;       		// Duty Cycle (0.27 best for turns)
+    double dcDutyCycle     = 0.27;       		// Duty Cycle (0.27 best for turns)
 		double dcWantedDuty    = 0.32;
 		int wantedServoPos     = 64;			// Desired Servo Position (64 is straight)
 		double sDutyCycle;
@@ -72,14 +72,14 @@ int main(void) {
     // **************************************		
 
 		///*** MAIN CODE ****
-		// Initalize PID DC Motor Control (min=0.15, max=0.30, ki=0.1, kp=0.4, kd=0.6)
-		PID_Init(&pid_controlDC, -0.03, 0.03, 0, 0.7, 0.12);
 		// Initalize PID Servo Motor Control (min=-2.5, max=2.5, ki=0.12, kp=0.97, kd=0.08)
-		PID_Init(&pid_controlServo, -2.5, 2.5, 0.12, 0.97, 0.08);
+		PID_Init(&pid_controlServo, -2.5, 2.5, 0.12, 0.97, 0.7);
 		// Start Running the Car
 		uart0_put("Deeba is going!\n\r");
 		// Set servo striaght
 		Servo_Modify(sDutyCycleMid);
+		// Move Forward
+		DCMotor_Modify(dcDutyCycle);
 		// Start Motors
 		DCMotor_On();
 			
@@ -95,11 +95,11 @@ int main(void) {
 			// Update servo with new duty cycle
 			Servo_Modify(sDutyCycle);	
 			
-			/* ***** MOTOR PID ***** */
+			/* ***** MOTOR CONTROL ***** */
 			// Get PID new Duty Cycle
-			dcDutyCycle = runMotors_PID(&pid_controlDC, dcWantedDuty, servoPos);
+			//dcDutyCycle = runMotors_PID(&pid_controlDC, dcWantedDuty, servoPos);
 			// Update motor with new duty cycle
-			DCMotor_Modify(dcDutyCycle);
+			//DCMotor_Modify(dcDutyCycle);
 
 			/* ***** CARPET CHECK ***** */
 			onCarpet = checkOnCarpet(lineData);
