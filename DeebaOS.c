@@ -29,12 +29,11 @@ int main(void) {
     
     // Motor Control Variables
     double dcDutyCycle     = 0.27;       		// Duty Cycle (0.27 best for turns)
-		double maxDCDutyCycle  = 0.27;	
-		double dcWantedDuty    = 0.40;
+	double maxDCDutyCycle  = 0.27;	
+		double dcWantedDuty    = 0.32;
 		int wantedServoPos     = 64;			// Desired Servo Position (64 is straight)
 		double sDutyCycle;
 		double sDutyCycleMid   = 0.0497;
-		double percent;
 		int servoPos;
 		pid_t  pid_controlDC;		// Pid Control Variables for DC Motors
 		pid_t  pid_controlServo;	// Pid Control Variables for Servo
@@ -99,7 +98,15 @@ int main(void) {
 			/* ***** MOTOR CONTROL ***** */
 			percent = getDCSpeedFromAngle(sDutyCycle);
 			dcDutyCycle = maxDCDutyCycle * percent;
-			DCMotor_Modify(dcDutyCycle);
+			if(sDutyCycle < .0497){ // turning right
+				DCMotor_Modify(dcDutyCycle, dcDutyCycle + .10);
+			}
+			else if(sDutyCycle > .0497){
+				DCMotor_Modify(dcDutyCycle +.10, dcDutyCycle);
+			}
+			else{
+				DCMotor_Modify(dcDutyCycle, dcDutyCycle);
+			}
 
 
 			/* ***** CARPET CHECK ***** */

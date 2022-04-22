@@ -141,19 +141,16 @@ double getDCSpeedFromAngle(double sDutyCycle){
 	double percent;
 	double leftRange = maxLeft - centerServo; 
 	double rightRange = centerServo - maxRight; // should probably move all these out of function to reduce runtime
-	if (sDutyCycle < centerServo){ // servo right
-		percent = sDutyCycle - maxRight;
+	if (angle < centerServo){ // servo right
+		percent = angle - maxRight;
 		percent = percent / rightRange;
 	}
-	else if (sDutyCycle > centerServo){ // Servo left
-		percent = maxLeft - sDutyCycle;
+	else if (angle > centerServo){ // Servo left
+		percent = maxLeft - angle;
 		percent = percent / leftRange; 
 	}
 	else{
 		percent = 1;
-	}
-	if(percent < 0.50){
-			percent = 0.5;
 	}
 	return percent;
 }
@@ -249,9 +246,9 @@ void RightMotorOff(){
 
 
 // Changes the Active Duty Cycle of the PWM for the DC Motor on TimerA0
-void DCMotor_Modify(double dutyCycle){
-		TIMER_A0_PWM_DutyCycle(dutyCycle, 2);
-		TIMER_A0_PWM_DutyCycle(dutyCycle, 4);
+void DCMotor_Modify(double dutyCycleL, double dutyCycleR){
+		TIMER_A0_PWM_DutyCycle(dutyCycleL, 2); // Left?
+		TIMER_A0_PWM_DutyCycle(dutyCycleR, 4); // Right?
 		TIMER_A0_PWM_DutyCycle(0, 3);
 		TIMER_A0_PWM_DutyCycle(0, 1);
 }
