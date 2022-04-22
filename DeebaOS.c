@@ -29,11 +29,12 @@ int main(void) {
     
     // Motor Control Variables
     double dcDutyCycle     = 0.27;       		// Duty Cycle (0.27 best for turns)
-	double maxDCDutyCycle  = 0.27;	
+	double maxDCDutyCycle  = 0.30;	
 		double dcWantedDuty    = 0.32;
 		int wantedServoPos     = 64;			// Desired Servo Position (64 is straight)
 		double sDutyCycle;
 		double sDutyCycleMid   = 0.0497;
+	 double percent;
 		int servoPos;
 		pid_t  pid_controlDC;		// Pid Control Variables for DC Motors
 		pid_t  pid_controlServo;	// Pid Control Variables for Servo
@@ -73,13 +74,13 @@ int main(void) {
 
 		///*** MAIN CODE ****
 		// Initalize PID Servo Motor Control (min=-2.5, max=2.5, ki=0.12, kp=0.97, kd=0.08)
-		PID_Init(&pid_controlServo, -2.5, 2.5, 0.12, 0.97, 0.7);
+		PID_Init(&pid_controlServo, -2.5, 2.5, 0.25, 2.0, 0.7);
 		// Start Running the Car
 		uart0_put("Deeba is going!\n\r");
 		// Set servo striaght
 		Servo_Modify(sDutyCycleMid);
 		// Move Forward
-		DCMotor_Modify(dcDutyCycle);
+		DCMotor_Modify(dcDutyCycle, dcDutyCycle);
 		// Start Motors
 		DCMotor_On();
 			
@@ -99,10 +100,10 @@ int main(void) {
 			percent = getDCSpeedFromAngle(sDutyCycle);
 			dcDutyCycle = maxDCDutyCycle * percent;
 			if(sDutyCycle < .0497){ // turning right
-				DCMotor_Modify(dcDutyCycle, dcDutyCycle + .10);
+				DCMotor_Modify(dcDutyCycle + .20, dcDutyCycle);
 			}
 			else if(sDutyCycle > .0497){
-				DCMotor_Modify(dcDutyCycle +.10, dcDutyCycle);
+				DCMotor_Modify(dcDutyCycle, dcDutyCycle + .20);
 			}
 			else{
 				DCMotor_Modify(dcDutyCycle, dcDutyCycle);

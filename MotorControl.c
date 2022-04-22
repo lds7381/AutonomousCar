@@ -141,16 +141,19 @@ double getDCSpeedFromAngle(double sDutyCycle){
 	double percent;
 	double leftRange = maxLeft - centerServo; 
 	double rightRange = centerServo - maxRight; // should probably move all these out of function to reduce runtime
-	if (angle < centerServo){ // servo right
-		percent = angle - maxRight;
+	if (sDutyCycle < centerServo){ // servo right
+		percent = sDutyCycle - maxRight;
 		percent = percent / rightRange;
 	}
-	else if (angle > centerServo){ // Servo left
-		percent = maxLeft - angle;
+	else if (sDutyCycle > centerServo){ // Servo left
+		percent = maxLeft - sDutyCycle;
 		percent = percent / leftRange; 
 	}
 	else{
 		percent = 1;
+	}
+	if(percent < 0.50){
+			percent = 0.50;
 	}
 	return percent;
 }

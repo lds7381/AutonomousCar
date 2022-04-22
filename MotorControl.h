@@ -23,7 +23,7 @@ typedef struct{
 
 void DCMotor_Init(uint16_t period, double dutyCycle);
 void Servo_Init(uint32_t period, double dutyCycle);
-void DCMotor_Modify(double dutyCycle);
+void DCMotor_Modify(double dutyCycleL, double dutyCycleR);
 void Servo_Modify(double dutyCycle);
 void RightMotorForward(double dutyCycle);
 void RightMotorBackward(double dutyCycle);

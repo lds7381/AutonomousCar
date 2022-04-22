@@ -87,7 +87,7 @@ uint16_t getTotalAverage(uint16_t* line){
 
 edges_t getPostionFromLineData(uint16_t* lineData){
 	int i;
-	int edgeTolerance = 6000;	// minimum value for the edge to be detected
+	int edgeTolerance = 6350;	// minimum value for the edge to be detected
 	edges_t edges;
 	BOOLEAN leftEdge = FALSE;
 	BOOLEAN rightEdge = FALSE;
@@ -152,7 +152,8 @@ edges_t getPostionFromLineData(uint16_t* lineData){
 				edges.leftPos = edges.rightPos-2;
 				
 		}
-		
+//		for(i=0;i<1000000;i++);
+//		uart0_put("\r\n");
 		edges.midPos = (edges.leftPos+edges.rightPos)/2;
 		return edges;
 }
