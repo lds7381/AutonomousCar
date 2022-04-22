@@ -37,4 +37,5 @@ void testMotorForward(double dutyCycle);
 void PID_Init(pid_t* pidControl, double min, double max, double ki, double kp, double kd);
 double runServo_PID(pid_t* pidControl, double desiredPos, uint16_t* lineData);
 double getDutyCycleFromPos(int servoPos);
+double getDCSpeedFromAngle(double sDutyCycle);
 double runMotors_PID(pid_t* pidControl, double desiredDutyCycle, int servoPos);

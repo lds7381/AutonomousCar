@@ -134,6 +134,33 @@ double getDutyCycleFromPos(int servoPos){
 	return sDutyCycle;
 }
 
+double getDCSpeedFromAngle(double sDutyCycle){
+	double centerServo = .0497; // from DeebaOS since sDutyCycleMid isnt global
+	double maxLeft = .0521; 
+	double maxRight = .0471;
+	double percent;
+	double leftRange = maxLeft - centerServo; 
+	double rightRange = centerServo - maxRight; // should probably move all these out of function to reduce runtime
+	if (angle < centerServo){ // servo right
+		percent = angle - maxRight;
+		percent = percent / rightRange;
+	}
+	else if (angle > centerServo){ // Servo left
+		percent = maxLeft - angle;
+		percent = percent / leftRange; 
+	}
+	else{
+		percent = 1;
+	}
+	return percent;
+}
+// How to Use:
+// in main: first do the PID for servo and pass in sDutycycle obtained
+//  		from getDutyCycleFromPos into SetDCSpeedFromAngle
+//			next, multiply the percent returned from this function
+//			by a maxDCPWM and set the DC speed to that.
+ 
+
 // Initalization Function with paramters (will start the motor at required cycle)
 // Initalizes TimerA0
 void DCMotor_Init(uint16_t period, double dutyCycle){
