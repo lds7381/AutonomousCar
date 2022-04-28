@@ -15,8 +15,11 @@
 #include "Camera.h"
 #include "msp432p4011.h"
 #include "CortexM.h"
+#include "switches.h"
+#include "leds.h"
 
 extern long CalcPeriodFromFrequency (double Hz);
+extern int speedMode;
 
 int main(void) {
     // Main Variables
@@ -24,16 +27,17 @@ int main(void) {
     uint32_t sPeriod  	= CalcPeriodFromFrequency(50);
 		int carpetCount 	= 0;
 		int onCarpet 		= 0;
-		BOOLEAN move 		= TRUE;
+		BOOLEAN move 		= FALSE;
 		uint16_t* lineData;
     
     // Motor Control Variables
     double dcDutyCycle     = 0.27;       		// Duty Cycle (0.27 best for turns)
-	double maxDCDutyCycle  = 0.30;	
+		double maxDCDutyCycle  = 0.30;	
 		double dcWantedDuty    = 0.32;
 		int wantedServoPos     = 64;			// Desired Servo Position (64 is straight)
 		double sDutyCycle;
 		double sDutyCycleMid   = 0.0497;
+		double diffSteer;
 	 double percent;
 		int servoPos;
 		pid_t  pid_controlDC;		// Pid Control Variables for DC Motors
@@ -53,7 +57,7 @@ int main(void) {
 //		double leftAvg;
 //		double rightAvg;
 //		double midAvg;
-//		int i;
+		int i = 0;
 //    char str[32];				// String used for uart printing
 		
     // **** Initalization of Peripherals ****
@@ -67,9 +71,8 @@ int main(void) {
     Servo_Init(sPeriod, sDutyCycleMid);  // Servo One (only one)
     // Init Camera
     LineScanCamera_Init();
-    // Init OLED
-    //OLED_Init();
-		//OLED_Print(1, 1, (char *)"Hello World?");
+    // Init Switches
+		Switches_Init();
     // **************************************		
 
 		///*** MAIN CODE ****
@@ -80,9 +83,35 @@ int main(void) {
 		// Set servo striaght
 		Servo_Modify(sDutyCycleMid);
 		// Move Forward
-		DCMotor_Modify(dcDutyCycle, dcDutyCycle);
+		DCMotor_Modify(0, 0);
 		// Start Motors
 		DCMotor_On();
+		
+		while(i < 50*16000 && speedMode == 1){		// Wait for 5 seconds or until speed mode is changed
+				i++;
+				if(Switch1_Pressed()){
+						speedMode = 0;
+						Change_LED2(2);
+				} 
+				else if (Switch2_Pressed()){
+						speedMode = 2;
+						Change_LED2(1);
+				}
+		}
+		if(speedMode == 0){					// SLOW MODE
+				maxDCDutyCycle = 0.24;
+				diffSteer = 0.20;
+		} 
+		else if(speedMode == 1) {		// MED MODE
+				Change_LED2(4);
+				maxDCDutyCycle = 0.30;
+				diffSteer = 0.20;
+		}
+		else if (speedMode == 2) {	// FAST MODE
+				maxDCDutyCycle = 0.37;
+				diffSteer = 0.1;
+		}
+		move = TRUE;
 			
 		// Main Loop
 		while(move){
@@ -100,13 +129,13 @@ int main(void) {
 			percent = getDCSpeedFromAngle(sDutyCycle);
 			dcDutyCycle = maxDCDutyCycle * percent;
 			if(sDutyCycle < .0497){ // turning right
-				DCMotor_Modify(dcDutyCycle + .20, dcDutyCycle);
+					DCMotor_Modify(dcDutyCycle + diffSteer, dcDutyCycle);
 			}
 			else if(sDutyCycle > .0497){
-				DCMotor_Modify(dcDutyCycle, dcDutyCycle + .20);
+					DCMotor_Modify(dcDutyCycle, dcDutyCycle + diffSteer);
 			}
 			else{
-				DCMotor_Modify(dcDutyCycle, dcDutyCycle);
+					DCMotor_Modify(dcDutyCycle, dcDutyCycle);
 			}
 
 
